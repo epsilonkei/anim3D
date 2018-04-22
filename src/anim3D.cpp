@@ -21,7 +21,7 @@ Eigen::Vector2d pos(0, 0); // Ball's center (x, y) position
 Eigen::Vector2d vel(0.02, 0.007); // Ball's speed in x and y directions
 Eigen::Vector2d gravity_acc(0, 0); // gravity acceleration
 double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
-static double org_dist = 1.0, org_pitch = -20.0, org_yaw = 0.0;
+static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
@@ -41,7 +41,7 @@ bool fullScreenMode = false; // Full-screen or windowed mode?
 
 /* Initialize OpenGL Graphics */
 void initGL() {
-  glClearColor (0.0, 0.0, 0.0, 0.0);
+  glClearColor (1.0, 1.0, 1.0, 1.0);
   glClearDepth( 1.0 );
 
   // Depth Test
@@ -85,6 +85,30 @@ void physic_calculate(){
    }
 }
 
+void draw_floor(){
+   double l = 10, s = 50;
+   glDisable(GL_LIGHTING); glBegin(GL_LINES);
+   glColor3f(0, 0, 0);
+   for (int y = -s; y <= s; y += l) {
+      for (int x = -s; x <= s; x += l) {
+         glVertex3f (x, -s, 0);
+         glVertex3f (x,  s, 0);
+         glVertex3f (-s, y, 0);
+         glVertex3f ( s, y, 0);
+      }
+   }
+   glEnd(); glEnable(GL_LIGHTING);
+}
+
+void draw_origin(){
+   double l = 1.5;
+   glDisable(GL_LIGHTING); glBegin(GL_LINES);
+   glColor3f(1, 0, 0); glVertex3f(0, 0, 0); glVertex3f(l, 0, 0);
+   glColor3f(0, 1, 0); glVertex3f(0, 0, 0); glVertex3f(0, l, 0);
+   glColor3f(0, 0, 1); glVertex3f(0, 0, 0); glVertex3f(0, 0, l);
+   glEnd(); glEnable(GL_LIGHTING);
+}
+
 /* Callback handler for window re-paint event */
 void display() {
    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -96,12 +120,16 @@ void display() {
    gluLookAt(0.0, 0.0, distance, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
    glRotatef( -pitch, 1.0, 0.0, 0.0 );
    glRotatef( -yaw, 0.0, 1.0, 0.0 );
+   draw_floor();
+   draw_origin();
    // glScalef (1.0, 1.0, 1.0);      /* modeling transformation */
 
    // glTranslatef(pos[0], pos[1], 0.0f);  // Translate to (xPos, yPos)
-   // glTranslatef(0, 0, 0.0f);  // Translate to (xPos, yPos)
-   glColor3f (1.0, 1.0, 1.0);
-   glutWireSphere (ballRadius, 32, 32);
+   glDisable(GL_LIGHTING);
+   glColor3f(1.0, 0.0, 0.0);
+   glTranslatef(0, 0, 5.0);  // Translate to (xPos, yPos)
+   glutWireSphere (ballRadius, 16, 16);
+   glEnable(GL_LIGHTING);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
    //physic_calculate();
 }
@@ -157,7 +185,7 @@ void keyboard(unsigned char key, int x, int y) {
          gravity_acc[1] = 0;
       }
       break;
-   case 'r': // Reset default camera
+   case 'r':    // r: Reset default camera
       distance = org_dist, pitch = org_pitch, yaw = org_yaw;
       break;
    }
@@ -230,7 +258,7 @@ void motion(int x, int y)
     if( y < mouse_y )
       distance += (GLfloat) (mouse_y - y)/50.0;
     else
-      distance -= (GLfloat) (y-mouse_y)/50.0;
+      distance -= (GLfloat) (y - mouse_y)/50.0;
     if( distance < 1.0 ) distance = 1.0;
     if( distance > 50.0 ) distance = 50.0;
     break;

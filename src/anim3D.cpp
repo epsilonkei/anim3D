@@ -111,8 +111,7 @@ void draw_origin(){
 
 /* Callback handler for window re-paint event */
 void display() {
-   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   // glClear(GL_COLOR_BUFFER_BIT);  // Clear the color buffer
+   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color buffer
    glMatrixMode(GL_MODELVIEW);    // To operate on the model-view matrix
    glLoadIdentity ();             /* clear the matrix */
            /* viewing transformation  */

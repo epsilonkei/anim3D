@@ -2,6 +2,8 @@
 #include <cmath>     // Needed for sin, cos
 #include <Eigen/Dense>
 #include <iostream>
+#include "particle.hpp"
+#include "floor.hpp"
 #define PI 3.14159265
 
 // Global variables
@@ -12,23 +14,31 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = 1;
+double dt = refreshMillis * 1e-3;
 bool applyGravity = false;
 
-double ballRadius = 0.2;   // Radius of the bouncing ball
-double grav = - 9.8 / refreshMillis * 0.1;
-Eigen::Vector2d pos(0, 0); // Ball's center (x, y) position
-Eigen::Vector2d vel(0.02, 0.007); // Ball's speed in x and y directions
-Eigen::Vector2d gravity_acc(0, 0); // gravity acceleration
+double ballMass = 1;
+double ballRadius = 0.2;   // Radius of the bouncing ballRadius
+double grav = -9.8;
+double prev_pos[] = {0,0,5}, pos[] = {0,0,5}, vel[] ={0,0,0}, acc[] = {0,0,0};
+particle Ball(ballMass, ballRadius, prev_pos, pos, vel, acc);
+
+double floor_elas = 0.5;
+double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
+static_floor Floor0(floor_org, floor_norm, floor_elas);
+
+// Eigen::Vector2d pos(0, 0); // Ball's center (x, y) position
+// Eigen::Vector2d vel(0.02, 0.007); // Ball's speed in x and y directions
+// Eigen::Vector2d gravity_acc(0, 0); // gravity acceleration
 double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
 static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
 
-static const GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
+static const GLfloat light_position[] = { 0.0, 0.0, 10.0, 1.0 };
 static const GLfloat light_ambient[] = {1.0, 1.0, 1.0, 1.0};
-static const GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
+static const GLfloat light_diffuse[] = {0.5, 0.5, 0.5, 1.0};
 
 static const GLfloat mat_default_color[] = { 1.0, 1.0, 1.0, 1.0 };
 static const GLfloat mat_default_specular[] = { 0.0, 0.0, 0.0, 0.0 };
@@ -41,7 +51,8 @@ bool fullScreenMode = false; // Full-screen or windowed mode?
 
 /* Initialize OpenGL Graphics */
 void initGL() {
-  glClearColor (1.0, 1.0, 1.0, 1.0);
+  // glClearColor (1.0, 1.0, 1.0, 1.0);
+  glClearColor (0.0, 0.0, 0.0, 1.0);
   glClearDepth( 1.0 );
 
   // Depth Test
@@ -64,31 +75,37 @@ void initGL() {
   glMaterialfv(GL_FRONT, GL_SHININESS, mat_default_shininess);
 }
 
-void physic_calculate(){
+void physics_calculate(){
    // Animation Control - compute the location for the next refresh
-   vel += gravity_acc * dt;
-   pos += vel * dt;
+   // Ball.updateEuler(dt);
+   Ball.updateVelvet(dt);
    // Check if the ball exceeds the edges
-   if (pos[0] > ballXMax) {
-      pos[0] = ballXMax;
-      vel[0] = -vel[0];
-   } else if (pos[0] < ballXMin) {
-      pos[0] = ballXMin;
-      vel[0] = -vel[0];
+   if (Floor0.norm_vec.dot(Ball.pos - Floor0.origin) < Ball.radius &&
+       Floor0.norm_vec.dot(Ball.vel) < 0) {
+      Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
+      Ball.pos += Floor0.norm_vec * Ball.radius;
    }
-   if (pos[1] > ballYMax) {
-      pos[1] = ballYMax;
-      vel[1] = -vel[1];
-   } else if (pos[1] < ballYMin) {
-      pos[1]  = ballYMin;
-      vel[1] = - vel[1];
-   }
+   // if (pos[0] > ballXMax) {
+   //    pos[0] = ballXMax;
+   //    vel[0] = -vel[0];
+   // } else if (pos[0] < ballXMin) {
+   //    pos[0] = ballXMin;
+   //    vel[0] = -vel[0];
+   // }
+   // if (pos[1] > ballYMax) {
+   //    pos[1] = ballYMax;
+   //    vel[1] = -vel[1];
+   // } else if (pos[1] < ballYMin) {
+   //    pos[1]  = ballYMin;
+   //    vel[1] = - vel[1];
+   // }
+
 }
 
 void draw_floor(){
    double l = 10, s = 50;
    glDisable(GL_LIGHTING); glBegin(GL_LINES);
-   glColor3f(0, 0, 0);
+   glColor3f(1, 1, 1);
    for (int y = -s; y <= s; y += l) {
       for (int x = -s; x <= s; x += l) {
          glVertex3f (x, -s, 0);
@@ -123,14 +140,15 @@ void display() {
    draw_origin();
    // glScalef (1.0, 1.0, 1.0);      /* modeling transformation */
 
-   // glTranslatef(pos[0], pos[1], 0.0f);  // Translate to (xPos, yPos)
-   glDisable(GL_LIGHTING);
-   glColor3f(1.0, 0.0, 0.0);
-   glTranslatef(0, 0, 5.0);  // Translate to (xPos, yPos)
-   glutWireSphere (ballRadius, 16, 16);
-   glEnable(GL_LIGHTING);
+   //glDisable(GL_LIGHTING);
+   //glColor3f(1.0, 0.0, 0.0);
+   //glTranslatef(0, 0, 5);  // Translate to (xPos, yPos, zPos)
+   //std::cout << Ball.pos[0] << ", " << Ball.pos[1] << ", " << Ball.pos[2] << std::endl;
+   glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
+   glutSolidSphere (ballRadius, 16, 16);
+   //glEnable(GL_LIGHTING);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
-   //physic_calculate();
+   physics_calculate();
 }
 
 /* Call back when the windows is re-sized */
@@ -179,9 +197,9 @@ void keyboard(unsigned char key, int x, int y) {
    case 'g':    // g: Apply gravity mode
       applyGravity = !applyGravity;         // Toggle state
       if (applyGravity) {                     // Apply Gravity mode
-         gravity_acc[1] = grav;
+         Ball.acc[2] = grav;
       } else {                                // Non-apply Gravity mode
-         gravity_acc[1] = 0;
+         Ball.acc[1] = 0;
       }
       break;
    case 'r':    // r: Reset default camera

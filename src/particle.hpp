@@ -37,4 +37,14 @@ public:
     this->time += dt;
   }
 
+  void updateVelvet(double dt) {
+    // this->acc = this->force / this->mass;
+    Eigen::Vector3d pos_buf = this->pos;
+    this->pos += (this->pos - this->prev_pos) + dt * dt * this->acc;
+    this->prev_pos = pos_buf;
+    this->vel = (this->pos - this->prev_pos) / dt;
+    this->last_dt = dt;
+    this->time += dt;
+  }
+
 };

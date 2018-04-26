@@ -21,7 +21,7 @@ double ballMass = 1;
 double ballRadius = 0.2;   // Radius of the bouncing ballRadius
 double grav = -9.8;
 double prev_pos[] = {0,0,5}, pos[] = {0,0,5}, vel[] ={0,0,0}, acc[] = {0,0,0};
-particle Ball(ballMass, ballRadius, prev_pos, pos, vel, acc);
+particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 
 double floor_elas = 1.0;
 double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
@@ -33,7 +33,7 @@ double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
 
-static const GLfloat light_position[] = { 0.0, 0.0, 10.0, 1.0 };
+static const GLfloat light_position[] = { 5.0, 5.0, 10.0, 1.0 };
 static const GLfloat light_ambient[] = {1.0, 1.0, 1.0, 1.0};
 static const GLfloat light_diffuse[] = {0.5, 0.5, 0.5, 1.0};
 
@@ -70,17 +70,19 @@ void initGL() {
   glMaterialfv(GL_FRONT, GL_AMBIENT, mat_default_color);
   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_default_specular);
   glMaterialfv(GL_FRONT, GL_SHININESS, mat_default_shininess);
+  Ball.init();
 }
 
 void physics_calculate(){
    // Animation Control - compute the location for the next refresh
-   Ball.updateEuler(dt);
-   // Ball.updateVelvet(dt);
+   // Ball.updateEuler(dt);
+   Ball.updateVelvet(dt);
    // Check if the ball exceeds the edges
    double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
    if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
       Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
       Ball.pos -= Floor0.norm_vec * dist_to_floor;
+      Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
    }
 }
 
@@ -114,13 +116,11 @@ void display() {
    glMatrixMode(GL_MODELVIEW);    // To operate on the model-view matrix
    glLoadIdentity ();             /* clear the matrix */
            /* viewing transformation  */
-   // gluLookAt (1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
    gluLookAt(0.0, 0.0, distance, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
    glRotatef( -pitch, 1.0, 0.0, 0.0 );
    glRotatef( -yaw, 0.0, 1.0, 0.0 );
    draw_floor();
    draw_origin();
-   // glScalef (1.0, 1.0, 1.0);      /* modeling transformation */
 
    //glDisable(GL_LIGHTING);
    //glColor3f(1.0, 0.0, 0.0);

@@ -23,7 +23,7 @@ double grav = -9.8;
 double prev_pos[] = {0,0,5}, pos[] = {0,0,5}, vel[] ={0,0,0}, acc[] = {0,0,0};
 particle Ball(ballMass, ballRadius, prev_pos, pos, vel, acc);
 
-double floor_elas = 0.5;
+double floor_elas = 1.0;
 double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
 static_floor Floor0(floor_org, floor_norm, floor_elas);
 
@@ -74,13 +74,13 @@ void initGL() {
 
 void physics_calculate(){
    // Animation Control - compute the location for the next refresh
-   // Ball.updateEuler(dt);
-   Ball.updateVelvet(dt);
+   Ball.updateEuler(dt);
+   // Ball.updateVelvet(dt);
    // Check if the ball exceeds the edges
-   if (Floor0.norm_vec.dot(Ball.pos - Floor0.origin) < Ball.radius &&
-       Floor0.norm_vec.dot(Ball.vel) < 0) {
+   double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
+   if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
       Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
-      Ball.pos += Floor0.norm_vec * Ball.radius;
+      Ball.pos -= Floor0.norm_vec * dist_to_floor;
    }
 }
 

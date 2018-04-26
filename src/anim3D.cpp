@@ -27,9 +27,6 @@ double floor_elas = 0.5;
 double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
 static_floor Floor0(floor_org, floor_norm, floor_elas);
 
-// Eigen::Vector2d pos(0, 0); // Ball's center (x, y) position
-// Eigen::Vector2d vel(0.02, 0.007); // Ball's speed in x and y directions
-// Eigen::Vector2d gravity_acc(0, 0); // gravity acceleration
 double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
 static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
@@ -85,21 +82,6 @@ void physics_calculate(){
       Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
       Ball.pos += Floor0.norm_vec * Ball.radius;
    }
-   // if (pos[0] > ballXMax) {
-   //    pos[0] = ballXMax;
-   //    vel[0] = -vel[0];
-   // } else if (pos[0] < ballXMin) {
-   //    pos[0] = ballXMin;
-   //    vel[0] = -vel[0];
-   // }
-   // if (pos[1] > ballYMax) {
-   //    pos[1] = ballYMax;
-   //    vel[1] = -vel[1];
-   // } else if (pos[1] < ballYMin) {
-   //    pos[1]  = ballYMin;
-   //    vel[1] = - vel[1];
-   // }
-
 }
 
 void draw_floor(){
@@ -310,7 +292,7 @@ int main(int argc, char** argv) {
    } else {
       glutReshapeWindow(windowWidth, windowHeight); // Switch into windowed mode
    }
-   initGL();                     // Our own OpenGL initialization
+   initGL();
    glutMainLoop();               // Enter event-processing loop
    return 0;
 }

@@ -37,7 +37,7 @@ static const GLfloat light_position[] = { 5.0, 5.0, 10.0, 1.0 };
 static const GLfloat light_ambient[] = {1.0, 1.0, 1.0, 1.0};
 static const GLfloat light_diffuse[] = {0.5, 0.5, 0.5, 1.0};
 
-static const GLfloat mat_default_color[] = { 1.0, 1.0, 1.0, 1.0 };
+static const GLfloat mat_default_color[] = { 1.0, 1.0, 1.0, 0.5 };
 static const GLfloat mat_default_specular[] = { 0.0, 0.0, 0.0, 0.0 };
 static const GLfloat mat_default_shininess[] = { 100.0 };
 static const GLfloat mat_default_emission[] = {0.0, 0.0, 0.0, 0.0};
@@ -45,6 +45,11 @@ static const GLfloat mat_default_emission[] = {0.0, 0.0, 0.0, 0.0};
 // Projection clipping area
 GLdouble clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop;
 bool fullScreenMode = false; // Full-screen or windowed mode?
+
+// Color for objects
+float red[] = {0.9, 0.1, 0.1, 1.0};
+float green[] = {0.1, 0.9, 0.1, 1.0};
+float blue[] = {0.1, 0.1, 0.9, 1.0};
 
 /* Initialize OpenGL Graphics */
 void initGL() {
@@ -66,10 +71,10 @@ void initGL() {
   glEnable(GL_LIGHT0);
 
   // Default material
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_default_color);
-  glMaterialfv(GL_FRONT, GL_AMBIENT, mat_default_color);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, mat_default_specular);
-  glMaterialfv(GL_FRONT, GL_SHININESS, mat_default_shininess);
+  // glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_default_color);
+  // glMaterialfv(GL_FRONT, GL_AMBIENT, mat_default_color);
+  // glMaterialfv(GL_FRONT, GL_SPECULAR, mat_default_specular);
+  // glMaterialfv(GL_FRONT, GL_SHININESS, mat_default_shininess);
   Ball.init();
 }
 
@@ -123,9 +128,8 @@ void display() {
    draw_origin();
 
    //glDisable(GL_LIGHTING);
-   //glColor3f(1.0, 0.0, 0.0);
-   //glTranslatef(0, 0, 5);  // Translate to (xPos, yPos, zPos)
-   //std::cout << Ball.pos[0] << ", " << Ball.pos[1] << ", " << Ball.pos[2] << std::endl;
+   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
+   // std::cout << Ball.vel[0] << ", " << Ball.vel[1] << ", " << Ball.vel[2] << std::endl;
    glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
    glutSolidSphere (ballRadius, 16, 16);
    //glEnable(GL_LIGHTING);

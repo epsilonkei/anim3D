@@ -81,7 +81,7 @@ void initGL() {
 void physics_calculate(){
    // Animation Control - compute the location for the next refresh
    // Ball.updateEuler(dt);
-   Ball.updateVelvet(dt);
+   Ball.updateVerlet(dt);
    // Check if the ball exceeds the edges
    double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
    if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {

@@ -111,7 +111,7 @@ void physics_calculate(){
 
    // Animation Control - compute the location for the next refresh
    Ball.updateEuler(dt);
-   // Ball.updateVelvet(dt);
+   // Ball.updateVerlet(dt);
 
    // Floor collision
    // double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;

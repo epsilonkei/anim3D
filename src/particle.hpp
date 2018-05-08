@@ -6,15 +6,28 @@ public:
   // buf
   double last_dt, time;
 
-  particle(double _mass, double _radius, double last_dt, double* _prev_pos, double* _pos, double* _vel, double* _acc)
+  particle() {}
+  particle(double _mass, double _radius, double _last_dt, double* _prev_pos, double* _pos, double* _vel, double* _acc)
     : prev_pos(Eigen::Map<Eigen::Vector3d>(_prev_pos,3)),
       pos(Eigen::Map<Eigen::Vector3d>(_pos,3)),
       vel(Eigen::Map<Eigen::Vector3d>(_vel,3)),
       acc(Eigen::Map<Eigen::Vector3d>(_acc,3)),
-      mass(_mass), radius(_radius), last_dt(last_dt), time(0),
+      mass(_mass), radius(_radius), last_dt(_last_dt), time(0),
       force(Eigen::Vector3d::Zero())
   {}
   ~ particle() {}
+
+  void initialize(double _mass, double _radius, double _last_dt, double* _prev_pos, double* _pos, double* _vel, double* _acc) {
+    this->prev_pos = Eigen::Map<Eigen::Vector3d>(_prev_pos,3);
+    this->pos = Eigen::Map<Eigen::Vector3d>(_pos,3);
+    this->vel = Eigen::Map<Eigen::Vector3d>(_vel,3);
+    this->acc = Eigen::Map<Eigen::Vector3d>(_acc,3);
+    this->mass = _mass;
+    this->radius = _radius;
+    this->last_dt = _last_dt;
+    this->time = 0;
+    this->force = Eigen::Vector3d::Zero();
+  }
 
   void init() {
     this->prev_pos = this->pos - last_dt * this->vel;
@@ -41,7 +54,7 @@ public:
     this->time += dt;
   }
 
-  void updateVelvet(double dt) {
+  void updateVerlet(double dt) {
     // this->acc = this->force / this->mass;
     Eigen::Vector3d pos_buf = this->pos;
     this->pos += (this->pos - this->prev_pos) + dt * dt * this->acc;

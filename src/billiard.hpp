@@ -28,8 +28,8 @@ public:
     Eigen::Vector3d collide_dir = (Ball1->pos - Ball2->pos);
     double collide_length = Ball1->radius + Ball2->radius - collide_dir.norm();
     collide_dir.normalize();
-    Ball1->pos -= collide_length * 0.5 * collide_dir;
-    Ball2->pos += collide_length * 0.5 * collide_dir;
+    Ball1->pos += collide_length * 0.5 * collide_dir;
+    Ball2->pos -= collide_length * 0.5 * collide_dir;
     // Calculate velocity after collision
     double a = 2 * collide_dir.dot(Ball1->vel - Ball2->vel) / (1/ Ball1->mass + 1/ Ball2->mass);
     Ball1->vel -= a / Ball1->mass * collide_dir;
@@ -45,15 +45,16 @@ public:
     Eigen::Vector3d collide_dir = (Ball1->pos - Ball2->pos);
     double collide_length = Ball1->radius + Ball2->radius - collide_dir.norm();
     collide_dir.normalize();
-    Ball1->pos -= collide_length * 0.5 * collide_dir;
-    Ball2->pos += collide_length * 0.5 * collide_dir;
+    Ball1->pos += collide_length * 0.5 * collide_dir;
+    Ball2->pos -= collide_length * 0.5 * collide_dir;
     // Update velocity
     Eigen::Vector3d b1_v_on_collide = Ball1->vel.dot(collide_dir) * collide_dir;
     Eigen::Vector3d b1_v_other = Ball1->vel - b1_v_on_collide;
-    Ball1->vel = b1_v_other - b1_v_on_collide;
     Eigen::Vector3d b2_v_on_collide = Ball2->vel.dot(collide_dir) * collide_dir;
     Eigen::Vector3d b2_v_other = Ball2->vel - b2_v_on_collide;
-    Ball2->vel = b2_v_other - b2_v_on_collide;
+    // Note: after collided, keep v_other component, exchange v_on_collide part
+    Ball1->vel = b1_v_other + b2_v_on_collide;
+    Ball2->vel = b2_v_other + b1_v_on_collide;
     // Update prev_pos
     Ball1->prev_pos = Ball1->pos - Ball1->vel * Ball1->last_dt;
     Ball2->prev_pos = Ball2->pos - Ball2->vel * Ball2->last_dt;
@@ -100,11 +101,12 @@ public:
 
   void update(double dt) {
     updateVerletAll(dt);
+    // updateEulerAll(dt);
     for ( int i=0; i<this->balls.size(); i++ ) {
-      for ( int j=0; j<this->balls.size(); j++ ) {
-        if ( i == j ) continue;
+      for ( int j=i+1; j<this->balls.size(); j++ ) {
+        // if ( i == j ) continue;
         if (is_collided(this->balls[i], this->balls[j])) {
-          force_based_response(this->balls[i], this->balls[j]);
+          pos_based_response(this->balls[i], this->balls[j]);
         }
       }
     }

@@ -58,6 +58,13 @@ float red[] = {0.9, 0.1, 0.1, 1.0};
 float green[] = {0.1, 0.9, 0.1, 1.0};
 float blue[] = {0.1, 0.1, 0.9, 1.0};
 
+float color[][4] = {{0.9, 0.1, 0.1, 1.0}, // red
+                    {0.1, 0.9, 0.1, 1.0}, // green
+                    {0.1, 0.1, 0.9, 1.0}, // blue
+                    {0.9, 0.9, 0.1, 1.0}, // yellow
+                    {0.9, 0.1, 0.9, 1.0}, // magenta
+                    {0.1, 0.9, 0.9, 1.0}};// cyan
+
 /* Initialize OpenGL Graphics */
 void initGL() {
   // glClearColor (1.0, 1.0, 1.0, 1.0);
@@ -133,10 +140,10 @@ void draw_billiard_table(billiard_table _BT){
    //
    glEnd(); glEnable(GL_LIGHTING);
    // Draw ball
-   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
    for (int i = 0; i < _BT.balls.size(); i++) {
       glPushMatrix();
       // glTranslatef(_BT.balls[i].pos[0], _BT.balls[i].pos[1], _BT.balls[i].pos[2]);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[i % (sizeof(color)/sizeof(*color))]);
       glTranslatef(_BT.balls[i]->pos[0], _BT.balls[i]->pos[1], _BT.balls[i]->pos[2]);
       glutSolidSphere (ballRadius, 16, 16);
       glPopMatrix();

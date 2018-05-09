@@ -48,7 +48,7 @@ public:
   }
 
   void updateEuler(double dt) {
-    // this->acc = this->force / this->mass;
+    this->acc = this->force / this->mass;
     this->prev_pos = this->pos;
     this->vel += dt * this->acc;
     this->pos += dt * this->vel;
@@ -57,7 +57,7 @@ public:
   }
 
   void updateVerlet(double dt) {
-    // this->acc = this->force / this->mass;
+    this->acc = this->force / this->mass;
     Eigen::Vector3d pos_buf = this->pos;
     this->pos += (this->pos - this->prev_pos) + dt * dt * this->acc;
     this->prev_pos = pos_buf;

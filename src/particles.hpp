@@ -102,12 +102,9 @@ public:
   }
 
   void setGravitationalForceAll() {
-    // Reset all force/acc to zero
-    for ( int i=0; i<this->pl.size(); i++) {
-      this->pl[i]->acc = Eigen::Vector3d::Zero();
-    }
-    // Calculate force/acc from sum of others' gravity force
     for ( int i=0; i<this->pl.size(); i++ ) {
+      // Reset all force/acc to zero
+      this->pl[i]->acc = Eigen::Vector3d::Zero();
       for ( int j=0; j<this->pl.size(); j++ ) {
         if ( i == j ) continue;
         Eigen::Vector3d dist_vec = (this->pl[j]->pos - this->pl[i]->pos);

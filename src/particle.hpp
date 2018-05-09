@@ -15,7 +15,9 @@ public:
       mass(_mass), radius(_radius), last_dt(_last_dt), time(0),
       force(Eigen::Vector3d::Zero())
   {}
-  ~ particle() {}
+  ~ particle() {
+    // std::cout << "destroy particle" << std::endl;
+  }
 
   void initialize(double _mass, double _radius, double _last_dt, double* _prev_pos, double* _pos, double* _vel, double* _acc) {
     this->prev_pos = Eigen::Map<Eigen::Vector3d>(_prev_pos,3);

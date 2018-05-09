@@ -84,7 +84,7 @@ void initSim() {
    for (int i = 0; i < N_ball; i++) {
       prev_poss[i][0] = i * 0.5 - 3; prev_poss[i][1] = 0; prev_poss[i][2] = ball_radiuss;
       poss[i][0] = i * 0.5 - 3; poss[i][1] = 0; poss[i][2] = ball_radiuss;
-      vels[i][0] = i * 0.5; vels[i][1] = 1; vels[i][2] = 0;
+      vels[i][0] = i * 0.5; vels[i][1] = (i + 0.5) * 0.5; vels[i][2] = 0;
       accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = 0;
       // accs[i] = {0,0,0}; only works with C++0x and above
       BT.add_particle(ball_masss, ball_radiuss, dt, prev_poss[i], poss[i], vels[i], accs[i]);
@@ -92,11 +92,12 @@ void initSim() {
    for (int i = 0; i < BT.balls.size(); i++) {
       BT.balls[i]->init();
    }
+   // std::cout << "table length: " << BT.table_length << std::endl;
 }
 
 void physics_calculate(){
    // Animation Control - compute the location for the next Refresh
-   // BT.update(dt);
+   BT.update(dt);
 }
 
 void draw_billiard_table(billiard_table _BT){
@@ -109,31 +110,33 @@ void draw_billiard_table(billiard_table _BT){
    glVertex3f (-tbl,  tbl, 0);
    glVertex3f (-tbl, -tbl, 0);
    //
-   // glVertex3f ( tbl, -tbl, 0);
-   // glVertex3f ( tbl,  tbl, 0);
-   // glVertex3f ( tbl,  tbl, h_side);
-   // glVertex3f ( tbl, -tbl, h_side);
-   // //
-   // glVertex3f ( tbl,  tbl, 0);
-   // glVertex3f (-tbl,  tbl, 0);
-   // glVertex3f (-tbl,  tbl, h_side);
-   // glVertex3f ( tbl,  tbl, h_side);
-   // //
-   // glVertex3f (-tbl,  tbl, 0);
-   // glVertex3f (-tbl, -tbl, 0);
-   // glVertex3f (-tbl, -tbl, h_side);
-   // glVertex3f (-tbl,  tbl, h_side);
-   // //
-   // glVertex3f (-tbl, -tbl, 0);
-   // glVertex3f ( tbl, -tbl, 0);
-   // glVertex3f ( tbl, -tbl, h_side);
-   // glVertex3f (-tbl, -tbl, h_side);
+   glColor3f(0.2, 0.2, 0.2);
+   glVertex3f ( tbl, -tbl, 0);
+   glVertex3f ( tbl,  tbl, 0);
+   glVertex3f ( tbl,  tbl, h_side);
+   glVertex3f ( tbl, -tbl, h_side);
+   //
+   glVertex3f ( tbl,  tbl, 0);
+   glVertex3f (-tbl,  tbl, 0);
+   glVertex3f (-tbl,  tbl, h_side);
+   glVertex3f ( tbl,  tbl, h_side);
+   //
+   glVertex3f (-tbl,  tbl, 0);
+   glVertex3f (-tbl, -tbl, 0);
+   glVertex3f (-tbl, -tbl, h_side);
+   glVertex3f (-tbl,  tbl, h_side);
+   //
+   glVertex3f (-tbl, -tbl, 0);
+   glVertex3f ( tbl, -tbl, 0);
+   glVertex3f ( tbl, -tbl, h_side);
+   glVertex3f (-tbl, -tbl, h_side);
    //
    glEnd(); glEnable(GL_LIGHTING);
    // Draw ball
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
    for (int i = 0; i < _BT.balls.size(); i++) {
       glPushMatrix();
+      // glTranslatef(_BT.balls[i].pos[0], _BT.balls[i].pos[1], _BT.balls[i].pos[2]);
       glTranslatef(_BT.balls[i]->pos[0], _BT.balls[i]->pos[1], _BT.balls[i]->pos[2]);
       glutSolidSphere (ballRadius, 16, 16);
       glPopMatrix();

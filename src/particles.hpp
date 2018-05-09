@@ -106,8 +106,9 @@ public:
         if ( i == j ) continue;
         Eigen::Vector3d dist_vec = (this->pl[j]->pos - this->pl[i]->pos);
         double dist = dist_vec.norm();
-        this->pl[i]->force += G_const * this->pl[i]->mass * this->pl[j]->mass
-          / (dist * dist * dist) * dist_vec;
+        // this->pl[i]->force += G_const * this->pl[i]->mass * this->pl[j]->mass
+        //  / (dist * dist * dist) * dist_vec;
+        this->pl[i]->acc += G_const * this->pl[j]->mass / (dist * dist * dist) * dist_vec;
       }
     }
   }

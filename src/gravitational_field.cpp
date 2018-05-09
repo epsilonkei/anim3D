@@ -94,7 +94,7 @@ void initSim() {
 
 void physics_calculate(){
    // Animation Control - compute the location for the next Refresh
-   PL.update(dt);
+   PL.updateWithGravitationalForce(dt);
 }
 
 void draw_particles(particles _PL){

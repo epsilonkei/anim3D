@@ -115,16 +115,28 @@ public:
   }
 
   void update(double dt) {
-    setGravitationalForceAll();
     updateVerletAll(dt);
+    // updateEulerAll(dt);
     for ( int i=0; i<this->pl.size(); i++ ) {
-      for ( int j=0; j<this->pl.size(); j++ ) {
-        if ( i == j ) continue;
+      for ( int j=i+1; j<this->pl.size(); j++ ) {
         if (is_collided(this->pl[i], this->pl[j])) {
           pos_based_response(this->pl[i], this->pl[j]);
         }
       }
     }
-    // checkBounceCollideAll();
+    checkBounceCollideAll();
+  }
+
+  void updateWithGravitationalForce(double dt) {
+    setGravitationalForceAll();
+    updateVerletAll(dt);
+    // updateEulerAll(dt);
+    for ( int i=0; i<this->pl.size(); i++ ) {
+      for ( int j=i+1; j<this->pl.size(); j++ ) {
+        if (is_collided(this->pl[i], this->pl[j])) {
+          pos_based_response(this->pl[i], this->pl[j]);
+        }
+      }
+    }
   }
 };

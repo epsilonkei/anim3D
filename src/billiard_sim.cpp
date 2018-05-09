@@ -3,8 +3,7 @@
 #include <Eigen/Dense>
 #include <iostream>
 // #include "particle.hpp"
-#include "billiard.hpp"
-#include "floor.hpp"
+#include "particles.hpp"
 #define PI 3.14159265
 
 // Global variables
@@ -25,14 +24,10 @@ double grav = -9.8;
 // particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 
 double table_length = 5;
-billiard_table BT(table_length);
+particles BT(table_length);
 
 #define N_ball 10
 double prev_poss[N_ball][3], poss[N_ball][3], vels[N_ball][3], accs[N_ball][3];
-
-double floor_elas = 1.0;
-double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
-static_floor Floor0(floor_org, floor_norm, floor_elas);
 
 double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
 static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
@@ -96,10 +91,9 @@ void initSim() {
       // accs[i] = {0,0,0}; only works with C++0x and above
       BT.add_particle(ball_masss, ball_radiuss, dt, prev_poss[i], poss[i], vels[i], accs[i]);
    }
-   for (int i = 0; i < BT.balls.size(); i++) {
-      BT.balls[i]->init();
+   for (int i = 0; i < BT.pl.size(); i++) {
+      BT.pl[i]->init();
    }
-   // std::cout << "table length: " << BT.table_length << std::endl;
 }
 
 void physics_calculate(){
@@ -107,7 +101,7 @@ void physics_calculate(){
    BT.update(dt);
 }
 
-void draw_billiard_table(billiard_table _BT){
+void draw_particles(particles _BT){
    double tbl = _BT.table_length, h_side = 1;
    // Table
    glDisable(GL_LIGHTING); glBegin(GL_QUADS);
@@ -140,11 +134,11 @@ void draw_billiard_table(billiard_table _BT){
    //
    glEnd(); glEnable(GL_LIGHTING);
    // Draw ball
-   for (int i = 0; i < _BT.balls.size(); i++) {
+   for (int i = 0; i < _BT.pl.size(); i++) {
       glPushMatrix();
-      // glTranslatef(_BT.balls[i].pos[0], _BT.balls[i].pos[1], _BT.balls[i].pos[2]);
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[i % (sizeof(color)/sizeof(*color))]);
-      glTranslatef(_BT.balls[i]->pos[0], _BT.balls[i]->pos[1], _BT.balls[i]->pos[2]);
+      // glTranslatef(_BT.pl[i].pos[0], _BT.pl[i].pos[1], _BT.pl[i].pos[2]);
+      glTranslatef(_BT.pl[i]->pos[0], _BT.pl[i]->pos[1], _BT.pl[i]->pos[2]);
       glutSolidSphere (ballRadius, 16, 16);
       glPopMatrix();
    }
@@ -186,7 +180,7 @@ void display() {
    physics_calculate();
    // draw_floor();
    draw_origin();
-   draw_billiard_table(BT);
+   draw_particles(BT);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
 }
 

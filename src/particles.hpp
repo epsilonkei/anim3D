@@ -3,7 +3,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-double G_const = 6.67408e-6; // 6.67408e-11
+double G_const = 6.67408e-3; // 6.67408e-11
 
 class particles {
 public:
@@ -101,7 +101,12 @@ public:
     }
   }
 
-  void setGravitationalForceAll() { // TODO: pointer
+  void setGravitationalForceAll() {
+    // Reset all force/acc to zero
+    for ( int i=0; i<this->pl.size(); i++) {
+      this->pl[i]->acc = Eigen::Vector3d::Zero();
+    }
+    // Calculate force/acc from sum of others' gravity force
     for ( int i=0; i<this->pl.size(); i++ ) {
       for ( int j=0; j<this->pl.size(); j++ ) {
         if ( i == j ) continue;

@@ -25,7 +25,7 @@ double grav = -9.8;
 double table_length = 5;
 particles PL(table_length);
 
-#define N_ball 10
+#define N_ball 50
 double prev_poss[N_ball][3], poss[N_ball][3], vels[N_ball][3], accs[N_ball][3];
 
 double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds

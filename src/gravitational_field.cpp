@@ -4,7 +4,6 @@
 #include <iostream>
 // #include "particle.hpp"
 #include "particles.hpp"
-#include "floor.hpp"
 #define PI 3.14159265
 
 // Global variables
@@ -82,7 +81,6 @@ void initSim() {
       prev_poss[i][0] = i * 0.5 - 3; prev_poss[i][1] = 0; prev_poss[i][2] = ball_radiuss;
       poss[i][0] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
       poss[i][1] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
-      // std::cout << "poss 0, 1: " << poss[i][0] << ", " <<poss[i][1] << std::endl;
       poss[i][2] = ball_radiuss;
       vels[i][0] = 0; vels[i][1] = 0; vels[i][2] = 0;
       accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = 0;
@@ -92,7 +90,6 @@ void initSim() {
    for (int i = 0; i < PL.pl.size(); i++) {
       PL.pl[i]->init();
    }
-   // std::cout << "table length: " << PL.table_length << std::endl;
 }
 
 void physics_calculate(){

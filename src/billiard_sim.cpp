@@ -84,7 +84,7 @@ void initSim() {
    for (int i = 0; i < N_ball; i++) {
       prev_poss[i][0] = i * 0.5 - 3; prev_poss[i][1] = 0; prev_poss[i][2] = ball_radiuss;
       poss[i][0] = i * 0.5 - 3; poss[i][1] = 0; poss[i][2] = ball_radiuss;
-      vels[i][0] = i * 0.5; vels[i][1] = (i + 0.5) * 0.5; vels[i][2] = 0;
+      vels[i][0] = i * 0.5; vels[i][1] = i * 0.1 + 0.5; vels[i][2] = 0;
       accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = 0;
       // accs[i] = {0,0,0}; only works with C++0x and above
       BT.add_particle(ball_masss, ball_radiuss, dt, prev_poss[i], poss[i], vels[i], accs[i]);

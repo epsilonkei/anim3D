@@ -139,7 +139,7 @@ void draw_particles(particles _BT){
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[i % (sizeof(color)/sizeof(*color))]);
       // glTranslatef(_BT.pl[i].pos[0], _BT.pl[i].pos[1], _BT.pl[i].pos[2]);
       glTranslatef(_BT.pl[i]->pos[0], _BT.pl[i]->pos[1], _BT.pl[i]->pos[2]);
-      glutSolidSphere (ballRadius, 16, 16);
+      glutSolidSphere (_BT.pl[i]->radius, 16, 16);
       glPopMatrix();
    }
 }

@@ -135,7 +135,7 @@ void draw_particles(particles _PL){
       glPushMatrix();
       // glTranslatef(_PL.pl[i].pos[0], _PL.pl[i].pos[1], _PL.pl[i].pos[2]);
       glTranslatef(_PL.pl[i]->pos[0], _PL.pl[i]->pos[1], _PL.pl[i]->pos[2]);
-      glutSolidSphere (ballRadius, 16, 16);
+      glutSolidSphere (_PL.pl[i]->radius, 16, 16);
       glPopMatrix();
    }
 }

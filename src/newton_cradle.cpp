@@ -29,7 +29,7 @@ double fpoint[N_ball][3], norm_vec[N_ball][3],
    prev_poss[N_ball][3], poss[N_ball][3], vels[N_ball][3], accs[N_ball][3];
 
 double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
-static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
+static double org_dist = 5.0, org_pitch = 60.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;

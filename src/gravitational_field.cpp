@@ -22,14 +22,14 @@ double ballMass = 1;
 double ballRadius = 0.2;   // Radius of the bouncing ballRadius
 double grav = -9.8;
 
-double table_length = 5;
+double table_length = 10;
 particles PL(table_length);
 
-#define N_ball 50
+#define N_ball 3
 double prev_poss[N_ball][3], poss[N_ball][3], vels[N_ball][3], accs[N_ball][3];
 
 double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
-static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
+static double org_dist = 15.0, org_pitch = 20.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
@@ -107,26 +107,26 @@ void draw_particles(particles _PL){
    glVertex3f (-tbl,  tbl, 0);
    glVertex3f (-tbl, -tbl, 0);
    //
-   // glColor3f(0.2, 0.2, 0.2);
-   // glVertex3f ( tbl, -tbl, 0);
-   // glVertex3f ( tbl,  tbl, 0);
-   // glVertex3f ( tbl,  tbl, h_side);
-   // glVertex3f ( tbl, -tbl, h_side);
-   // //
-   // glVertex3f ( tbl,  tbl, 0);
-   // glVertex3f (-tbl,  tbl, 0);
-   // glVertex3f (-tbl,  tbl, h_side);
-   // glVertex3f ( tbl,  tbl, h_side);
-   // //
-   // glVertex3f (-tbl,  tbl, 0);
-   // glVertex3f (-tbl, -tbl, 0);
-   // glVertex3f (-tbl, -tbl, h_side);
-   // glVertex3f (-tbl,  tbl, h_side);
-   // //
-   // glVertex3f (-tbl, -tbl, 0);
-   // glVertex3f ( tbl, -tbl, 0);
-   // glVertex3f ( tbl, -tbl, h_side);
-   // glVertex3f (-tbl, -tbl, h_side);
+   glColor3f(0.2, 0.2, 0.2);
+   glVertex3f ( tbl, -tbl, 0);
+   glVertex3f ( tbl,  tbl, 0);
+   glVertex3f ( tbl,  tbl, h_side);
+   glVertex3f ( tbl, -tbl, h_side);
+   //
+   glVertex3f ( tbl,  tbl, 0);
+   glVertex3f (-tbl,  tbl, 0);
+   glVertex3f (-tbl,  tbl, h_side);
+   glVertex3f ( tbl,  tbl, h_side);
+   //
+   glVertex3f (-tbl,  tbl, 0);
+   glVertex3f (-tbl, -tbl, 0);
+   glVertex3f (-tbl, -tbl, h_side);
+   glVertex3f (-tbl,  tbl, h_side);
+   //
+   glVertex3f (-tbl, -tbl, 0);
+   glVertex3f ( tbl, -tbl, 0);
+   glVertex3f ( tbl, -tbl, h_side);
+   glVertex3f (-tbl, -tbl, h_side);
    //
    glEnd(); glEnable(GL_LIGHTING);
    // Draw ball

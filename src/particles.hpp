@@ -1,10 +1,12 @@
 #include <boost/shared_ptr.hpp>
-#include "particle.hpp"
+// #include "particle.hpp"
 #include <vector>
 #include <Eigen/Dense>
+#include "node.hpp"
 
-double G_const = 6.67408e-3; // 6.67408e-11
+double G_const = 6.67408e-1; // 6.67408e-11
 double epsilon = 1e-9;
+double far_enough_thres = 0.5;
 
 class particles {
 public:
@@ -117,6 +119,39 @@ public:
     }
   }
 
+  void calcForceFromNode(int pid, boost::shared_ptr<node>& _node) {
+    if (_node->childs.size() > 0) {
+      Eigen::Vector3d com = _node->sum_of_pos_mass / _node->mass;
+      Eigen::Vector3d dist_vec = (com - this->pl[pid]->pos);
+      double dist = std::max(dist_vec.norm(), epsilon); // Deal with too small distance problem
+      if (_node->size / dist <= far_enough_thres) {
+        this->pl[pid]->acc += G_const * _node->mass / (dist * dist * dist) * dist_vec;
+      } else {
+        for (int i=0; i < _node->childs.size(); i++) {
+          calcForceFromNode(pid, _node->childs[i]);
+        }
+      }
+    } else if (_node->p_id != -1 and _node->p_id != pid) {
+      Eigen::Vector3d dist_vec = (this->pl[_node->p_id]->pos - this->pl[pid]->pos);
+      double dist = std::max(dist_vec.norm(), epsilon); // Deal with too small distance problem
+      this->pl[pid]->acc += G_const * this->pl[_node->p_id]->mass / (dist * dist * dist) * dist_vec;
+    }
+  }
+
+  void setGravitationalForceAllWithBHAlg() {
+    // Create quadtree
+    boost::shared_ptr<node> root(new node(2 * this->table_length, -this->table_length, -this->table_length));
+    for ( int i=0; i<this->pl.size(); i++ ) {
+      root->add_particle(i, pl);
+    }
+    // Calculate gravitational force
+    for ( int i=0; i<this->pl.size(); i++ ) {
+      // Reset all force/acc to zero
+      this->pl[i]->acc = Eigen::Vector3d::Zero();
+      calcForceFromNode(i, root);
+    }
+  }
+
   void update(double dt) {
     updateVerletAll(dt);
     // updateEulerAll(dt);
@@ -131,7 +166,8 @@ public:
   }
 
   void updateWithGravitationalForce(double dt) {
-    setGravitationalForceAll();
+    // setGravitationalForceAll();
+    setGravitationalForceAllWithBHAlg();
     updateVerletAll(dt);
     // updateEulerAll(dt);
     for ( int i=0; i<this->pl.size(); i++ ) {

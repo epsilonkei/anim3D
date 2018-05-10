@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 
 double G_const = 6.67408e-3; // 6.67408e-11
+double epsilon = 1e-9;
 
 class particles {
 public:
@@ -108,7 +109,7 @@ public:
       for ( int j=0; j<this->pl.size(); j++ ) {
         if ( i == j ) continue;
         Eigen::Vector3d dist_vec = (this->pl[j]->pos - this->pl[i]->pos);
-        double dist = dist_vec.norm();
+        double dist = std::max(dist_vec.norm(), epsilon); // Deal with too small distance problem
         // this->pl[i]->force += G_const * this->pl[i]->mass * this->pl[j]->mass
         //  / (dist * dist * dist) * dist_vec;
         this->pl[i]->acc += G_const * this->pl[j]->mass / (dist * dist * dist) * dist_vec;
@@ -140,5 +141,6 @@ public:
         }
       }
     }
+    checkBounceCollideAll();
   }
 };

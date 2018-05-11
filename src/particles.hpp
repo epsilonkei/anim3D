@@ -6,7 +6,7 @@
 
 double G_const = 6.67408e-1; // 6.67408e-11
 double epsilon = 1e-9;
-double far_enough_thres = 0.5;
+double far_enough_thres = 0;
 
 class particles {
 public:
@@ -120,10 +120,12 @@ public:
   }
 
   void calcForceFromNode(int pid, boost::shared_ptr<node>& _node) {
+    Eigen::Vector3d dist_vec;
+    double dist;
     if (_node->childs.size() > 0) {
       Eigen::Vector3d com = _node->sum_of_pos_mass / _node->mass;
-      Eigen::Vector3d dist_vec = (com - this->pl[pid]->pos);
-      double dist = std::max(dist_vec.norm(), epsilon); // Deal with too small distance problem
+      dist_vec = (com - this->pl[pid]->pos);
+      dist = std::max(dist_vec.norm(), epsilon); // Deal with too small distance problem
       if (_node->size / dist <= far_enough_thres) {
         this->pl[pid]->acc += G_const * _node->mass / (dist * dist * dist) * dist_vec;
       } else {
@@ -132,8 +134,8 @@ public:
         }
       }
     } else if (_node->p_id != -1 and _node->p_id != pid) {
-      Eigen::Vector3d dist_vec = (this->pl[_node->p_id]->pos - this->pl[pid]->pos);
-      double dist = std::max(dist_vec.norm(), epsilon); // Deal with too small distance problem
+      dist_vec = (this->pl[_node->p_id]->pos - this->pl[pid]->pos);
+      dist = std::max(dist_vec.norm(), epsilon); // Deal with too small distance problem
       this->pl[pid]->acc += G_const * this->pl[_node->p_id]->mass / (dist * dist * dist) * dist_vec;
     }
   }

@@ -22,8 +22,6 @@ public:
     int iy = int((pl[id]->pos[1] - this->bottom_left_y)/hsize);
     int id_child = ix + iy * 2;
     this->childs[id_child]->add_particle(id, pl);
-    this->mass += pl[id]->mass;
-    this->sum_of_pos_mass += pl[id]->mass * pl[id]->pos;
   }
 
   void add_particle(int id, std::vector<boost::shared_ptr<particle> > pl) {
@@ -41,6 +39,8 @@ public:
     } else {
       this->p_id = id;
     }
+    this->mass += pl[id]->mass;
+    this->sum_of_pos_mass += pl[id]->mass * pl[id]->pos;
   }
 
 };

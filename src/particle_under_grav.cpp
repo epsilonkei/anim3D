@@ -17,20 +17,21 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = refreshMillis * 1e-3;
+// double dt = refreshMillis * 1e-3;
+double dt = 1e-2;
 bool applyGravity = true;
 
 double ballMass = 1;
 double ballRadius = 0.2;
 
-double prev_pos[] = {0,0,5}, pos[] = {0,0,5}, vel[] ={0,0,0}, acc[] = {0,0,0};
+double prev_pos[] = {-3,0,2}, pos[] = {-3,0,2}, vel[] ={3,0,4}, acc[] = {0,0,0};
 particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 
 double floor_elas = 1.0;
 double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
 static_floor Floor0(floor_org, floor_norm, floor_elas);
 
-static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
+static double org_dist = 10.0, org_pitch = 80.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
@@ -54,7 +55,6 @@ float blue[] = {0.1, 0.1, 0.9, 1.0};
 
 /* Initialize OpenGL Graphics */
 void initGL() {
-  // glClearColor (1.0, 1.0, 1.0, 1.0);
   glClearColor (0.0, 0.0, 0.0, 1.0);
   glClearDepth( 1.0 );
 
@@ -83,13 +83,13 @@ void physics_calculate(){
    // Animation Control - compute the location for the next refresh
    // Ball.updateEuler(dt);
    Ball.updateVerlet(dt);
-   // Check if the ball exceeds the edges
-   double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
-   if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
-      Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
-      Ball.pos -= Floor0.norm_vec * dist_to_floor;
-      Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
-   }
+   // Check if the ball collides the floor
+   // double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
+   // if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
+   //    Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
+   //    Ball.pos -= Floor0.norm_vec * dist_to_floor;
+   //    Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
+   // }
 }
 
 void draw_floor(){
@@ -121,13 +121,13 @@ void display() {
    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color buffer
    glMatrixMode(GL_MODELVIEW);    // To operate on the model-view matrix
    glLoadIdentity ();             /* clear the matrix */
-           /* viewing transformation  */
+   /* viewing transformation  */
    gluLookAt(0.0, 0.0, distance, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
    glRotatef( -pitch, 1.0, 0.0, 0.0 );
    glRotatef( -yaw, 0.0, 1.0, 0.0 );
-   draw_floor();
+   // draw_floor();
    draw_origin();
-
+   // Draw particle
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
    glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
    glutSolidSphere (Ball.radius, 16, 16);

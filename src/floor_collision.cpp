@@ -1,9 +1,9 @@
 #include <GL/glut.h>  // GLUT, include glu.h and gl.h
-#include <cmath>     // Needed for sin, cos
+#include <cmath>
 #include <Eigen/Dense>
 #include <iostream>
 #include "particle.hpp"
-#include "line.hpp"
+#include "floor.hpp"
 #define PI 3.14159265
 
 extern double grav;
@@ -21,16 +21,14 @@ double dt = refreshMillis * 1e-3;
 bool applyGravity = true;
 
 double ballMass = 1;
-double ballRadius = 0.2;   // Radius of the bouncing ballRadius
-double prev_pos[] = {0,0,2}, pos[] = {0,0,2}, vel[] ={0,0,0}, acc[] = {0,0,0};
+double ballRadius = 0.2;
+
+double prev_pos[] = {0,0,5}, pos[] = {0,0,5}, vel[] ={0,0,0}, acc[] = {0,0,0};
 particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 
-// double floor_elas = 1.0;
-// double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
-// static_floor Floor0(floor_org, floor_norm, floor_elas);
-
-double start[] = {0,0,-5}, end[] = {0,0,5}, line_length = 10;
-line_segment Line0(start, end);
+double floor_elas = 1.0;
+double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
+static_floor Floor0(floor_org, floor_norm, floor_elas);
 
 static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
@@ -41,6 +39,11 @@ static const GLfloat light_position[] = { 5.0, 5.0, 10.0, 1.0 };
 static const GLfloat light_ambient[] = {1.0, 1.0, 1.0, 1.0};
 static const GLfloat light_diffuse[] = {0.5, 0.5, 0.5, 1.0};
 
+static const GLfloat mat_default_color[] = { 1.0, 1.0, 1.0, 0.5 };
+static const GLfloat mat_default_specular[] = { 0.0, 0.0, 0.0, 0.0 };
+static const GLfloat mat_default_shininess[] = { 100.0 };
+static const GLfloat mat_default_emission[] = {0.0, 0.0, 0.0, 0.0};
+
 // Projection clipping area
 bool fullScreenMode = false; // Full-screen or windowed mode?
 
@@ -48,13 +51,10 @@ bool fullScreenMode = false; // Full-screen or windowed mode?
 float red[] = {0.9, 0.1, 0.1, 1.0};
 float green[] = {0.1, 0.9, 0.1, 1.0};
 float blue[] = {0.1, 0.1, 0.9, 1.0};
-float yellow[] = {0.9, 0.9, 0.1, 1.0};
-
-Eigen::Vector3d axis = e2;
-double rotate_ang = 1 * dt; // unit: deg/s * s
 
 /* Initialize OpenGL Graphics */
 void initGL() {
+  // glClearColor (1.0, 1.0, 1.0, 1.0);
   glClearColor (0.0, 0.0, 0.0, 1.0);
   glClearDepth( 1.0 );
 
@@ -80,60 +80,16 @@ void initGL() {
 }
 
 void physics_calculate(){
-   // Rotate line
-   double half_length = (Line0.end - Line0.start).norm() * 0.5;
-   Eigen::Vector3d line_dir = (Line0.end - Line0.start).normalized();
-   Eigen::Vector3d cent = (Line0.end + Line0.start) * 0.5;
-   Eigen::Vector3d c_to_s = Line0.start - cent;
-   Eigen::Vector3d c_to_e = Line0.end - cent;
-   Eigen::Vector3d dstart = axis.cross(c_to_s)/(axis.norm() * c_to_s.norm()) * sin(rotate_ang);
-   c_to_s += dstart;
-   c_to_s = c_to_s / c_to_s.norm() * half_length;
-   Line0.start = cent + c_to_s;
-   //
-   Eigen::Vector3d dend = axis.cross(c_to_e)/(axis.norm() * c_to_e.norm()) * sin(rotate_ang);
-   c_to_e += dend;
-   c_to_e = c_to_e / c_to_e.norm() * half_length;
-   Line0.end = cent + c_to_e;
-
-   // Move Ball along with line movement
-   double pos_on_line = (Ball.pos - cent).dot(line_dir);
-   line_dir = (Line0.end - Line0.start).normalized();
-   Ball.pos = cent * 0.5 + line_dir * pos_on_line;
-
    // Animation Control - compute the location for the next refresh
-   Ball.updateEuler(dt);
-   // Ball.updateVerlet(dt);
-
-   // Floor collision
-   // double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
-   // if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
-   //    Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
-   //    Ball.pos -= Floor0.norm_vec * dist_to_floor;
-   //    Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
-   // }
-
-   // Project to movement to line
-   Eigen::Vector3d dx = Ball.pos - Ball.prev_pos;
-   dx = dx.dot(line_dir) * line_dir;
-   Ball.pos = Ball.prev_pos + dx; // Project to movement to line
-   Eigen::Vector3d start_to_Ball = Ball.pos - Line0.start;
-   double dist_on_line = start_to_Ball.dot(line_dir);
-   if (dist_on_line < 0) {
-      Ball.pos = Line0.start; // If ball goes over start point of Line, move ball to start point
-   } else if (dist_on_line > (Line0.end - Line0.start).norm()){
-      Ball.pos = Line0.end;
+   // Ball.updateEuler(dt);
+   Ball.updateVerlet(dt);
+   // Check if the ball collides the floor
+   double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
+   if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
+      Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
+      Ball.pos -= Floor0.norm_vec * dist_to_floor;
+      Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
    }
-}
-
-void draw_line_segment(line_segment Line){
-   glLineWidth(5.0);
-   glDisable(GL_LIGHTING); glBegin(GL_LINES);
-   glColor3f(1, 1, 0); //yellow
-   glVertex3d(Line.start[0], Line.start[1], Line.start[2]);
-   glVertex3d(Line.end[0], Line.end[1], Line.end[2]);
-   glEnd(); glEnable(GL_LIGHTING);
-   glLineWidth(1.0);
 }
 
 void draw_floor(){
@@ -142,10 +98,10 @@ void draw_floor(){
    glColor3f(1, 1, 1);
    for (int y = -s; y <= s; y += l) {
       for (int x = -s; x <= s; x += l) {
-         glVertex3d (x, -s, 0);
-         glVertex3d (x,  s, 0);
-         glVertex3d (-s, y, 0);
-         glVertex3d ( s, y, 0);
+         glVertex3f (x, -s, 0);
+         glVertex3f (x,  s, 0);
+         glVertex3f (-s, y, 0);
+         glVertex3f ( s, y, 0);
       }
    }
    glEnd(); glEnable(GL_LIGHTING);
@@ -154,9 +110,9 @@ void draw_floor(){
 void draw_origin(){
    double l = 1.5;
    glDisable(GL_LIGHTING); glBegin(GL_LINES);
-   glColor3f(1, 0, 0); glVertex3d(0, 0, 0); glVertex3d(l, 0, 0);
-   glColor3f(0, 1, 0); glVertex3d(0, 0, 0); glVertex3d(0, l, 0);
-   glColor3f(0, 0, 1); glVertex3d(0, 0, 0); glVertex3d(0, 0, l);
+   glColor3f(1, 0, 0); glVertex3f(0, 0, 0); glVertex3f(l, 0, 0);
+   glColor3f(0, 1, 0); glVertex3f(0, 0, 0); glVertex3f(0, l, 0);
+   glColor3f(0, 0, 1); glVertex3f(0, 0, 0); glVertex3f(0, 0, l);
    glEnd(); glEnable(GL_LIGHTING);
 }
 
@@ -165,24 +121,18 @@ void display() {
    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color buffer
    glMatrixMode(GL_MODELVIEW);    // To operate on the model-view matrix
    glLoadIdentity ();             /* clear the matrix */
-           /* viewing transformation  */
+   /* viewing transformation  */
    gluLookAt(0.0, 0.0, distance, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
    glRotatef( -pitch, 1.0, 0.0, 0.0 );
    glRotatef( -yaw, 0.0, 1.0, 0.0 );
-   glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
    draw_floor();
    draw_origin();
-   // Line0.rotate(0.5*dt, e2);
-   physics_calculate();
-   draw_line_segment(Line0);
-   //
-   // glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
-   glEnable(GL_COLOR_MATERIAL);
-   glColor4f(0.9, 0.1, 0.1, 1.0); // red
+   // Draw particle
+   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
    glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
-   glutSolidSphere (ballRadius, 16, 16);
-   glDisable(GL_COLOR_MATERIAL);
+   glutSolidSphere (Ball.radius, 16, 16);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
+   physics_calculate();
 }
 
 /* Call back when the windows is re-sized */
@@ -243,18 +193,18 @@ void specialKeys(int key, int x, int y) {
       }
       break;
    case GLUT_KEY_RIGHT:    // Right: increase x speed
-      vel[0] += 0.002; break;
+      Ball.vel[0] += 0.002; break;
    case GLUT_KEY_LEFT:     // Left: decrease x speed
-      vel[0] -= 0.002; break;
+      Ball.vel[0] -= 0.002; break;
    case GLUT_KEY_UP:       // Up: increase y speed
-      vel[1] += 0.002; break;
+      Ball.vel[1] += 0.002; break;
    case GLUT_KEY_DOWN:     // Down: decrease y speed
-      vel[1] -= 0.002; break;
+      Ball.vel[1] -= 0.002; break;
    case GLUT_KEY_PAGE_UP:  // Page-Up: increase ball's radius
-      ballRadius *= 1.05;
+      Ball.radius *= 1.05;
       break;
    case GLUT_KEY_PAGE_DOWN: // Page-Down: decrease ball's radius
-      ballRadius *= 0.95;
+      Ball.radius *= 0.95;
       break;
    }
 }

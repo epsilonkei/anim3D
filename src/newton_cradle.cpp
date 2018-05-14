@@ -15,12 +15,13 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = refreshMillis * 1e-3;
+// double dt = refreshMillis * 1e-3;
+double dt = 1e-3;
 bool applyGravity = false;
 
 double ballMass = 1;
 double ballRadius = 0.2;   // Radius of the bouncing ballRadius
-double grav = -9.8;
+extern double grav;
 
 pendulums PL;
 
@@ -89,13 +90,13 @@ void initSim() {
       fpoint[i][0] = poss[i][0];
       fpoint[i][1] = 0; fpoint[i][2] = height;
       //
-      if (i == 0) {
+      if (i < 1) {
          vels[i][0] = -2;
       } else {
          vels[i][0] = 0;
       }
       vels[i][1] = 0; vels[i][2] = 0;
-      accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = grav;
+      accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = -grav;
       // accs[i] = {0,0,0}; only works with C++0x and above
       PL.add_pendulum(wl, fpoint[i], norm_vec[i], ball_masss, ball_radiuss, dt, prev_poss[i], poss[i], vels[i], accs[i]);
    }
@@ -106,7 +107,9 @@ void initSim() {
 
 void physics_calculate(){
    // Animation Control - compute the location for the next Refresh
-   PL.update(dt);
+   for (int i = 0; i < refreshMillis; i++) {
+      PL.update(dt);
+   }
 }
 
 void draw_pendulums(pendulums _PL){

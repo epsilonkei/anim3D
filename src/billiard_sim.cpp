@@ -6,6 +6,9 @@
 #include "particles.hpp"
 #define PI 3.14159265
 
+extern double grav;
+extern Eigen::Vector3d e1, e2, e3;
+
 // Global variables
 char title[] = "Full-Screen & Windowed Mode";  // Windowed mode's title
 int windowWidth  = 640;     // Windowed mode's width
@@ -19,7 +22,6 @@ bool applyGravity = false;
 
 double ballMass = 1;
 double ballRadius = 0.2;   // Radius of the bouncing ballRadius
-double grav = -9.8;
 // double prev_pos[] = {0,0,5}, pos[] = {0,0,5}, vel[] ={0,0,0}, acc[] = {0,0,0};
 // particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 
@@ -39,13 +41,6 @@ static const GLfloat light_position[] = { 5.0, 5.0, 10.0, 1.0 };
 static const GLfloat light_ambient[] = {1.0, 1.0, 1.0, 1.0};
 static const GLfloat light_diffuse[] = {0.5, 0.5, 0.5, 1.0};
 
-static const GLfloat mat_default_color[] = { 1.0, 1.0, 1.0, 0.5 };
-static const GLfloat mat_default_specular[] = { 0.0, 0.0, 0.0, 0.0 };
-static const GLfloat mat_default_shininess[] = { 100.0 };
-static const GLfloat mat_default_emission[] = {0.0, 0.0, 0.0, 0.0};
-
-// Projection clipping area
-GLdouble clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop;
 bool fullScreenMode = false; // Full-screen or windowed mode?
 
 // Color for objects
@@ -197,22 +192,6 @@ void reshape(GLsizei width, GLsizei height) {
    glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
    glLoadIdentity();             // Reset the projection matrix
    gluPerspective(60.0, aspect, 1.0, 60.0);
-   if (width >= height) {
-      clipAreaXLeft   = -1.0 * aspect;
-      clipAreaXRight  = 1.0 * aspect;
-      clipAreaYBottom = -1.0;
-      clipAreaYTop    = 1.0;
-   } else {
-      clipAreaXLeft   = -1.0;
-      clipAreaXRight  = 1.0;
-      clipAreaYBottom = -1.0 / aspect;
-      clipAreaYTop    = 1.0 / aspect;
-   }
-   // gluOrtho2D(clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop);
-   ballXMin = clipAreaXLeft + ballRadius;
-   ballXMax = clipAreaXRight - ballRadius;
-   ballYMin = clipAreaYBottom + ballRadius;
-   ballYMax = clipAreaYTop - ballRadius;
 }
 
 /* Called back when the timer expired */
@@ -226,14 +205,6 @@ void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
       exit(0);
-      break;
-   case 'g':    // g: Apply gravity mode
-      applyGravity = !applyGravity;         // Toggle state
-      // if (applyGravity) {                     // Apply Gravity mode
-      //    Ball.acc[2] = grav;
-      // } else {                                // Non-apply Gravity mode
-      //    Ball.acc[1] = 0;
-      // }
       break;
    case 'r':    // r: Reset default camera
       distance = org_dist, pitch = org_pitch, yaw = org_yaw;
@@ -256,28 +227,6 @@ void specialKeys(int key, int x, int y) {
          glutReshapeWindow(windowWidth, windowHeight); // Switch into windowed mode
          glutPositionWindow(windowPosX, windowPosX);   // Position top-left corner
       }
-      break;
-   // case GLUT_KEY_RIGHT:    // Right: increase x speed
-   //    vel[0] += 0.002; break;
-   // case GLUT_KEY_LEFT:     // Left: decrease x speed
-   //    vel[0] -= 0.002; break;
-   // case GLUT_KEY_UP:       // Up: increase y speed
-   //    vel[1] += 0.002; break;
-   // case GLUT_KEY_DOWN:     // Down: decrease y speed
-   //    vel[1] -= 0.002; break;
-   case GLUT_KEY_PAGE_UP:  // Page-Up: increase ball's radius
-      ballRadius *= 1.05;
-      ballXMin = clipAreaXLeft + ballRadius;
-      ballXMax = clipAreaXRight - ballRadius;
-      ballYMin = clipAreaYBottom + ballRadius;
-      ballYMax = clipAreaYTop - ballRadius;
-      break;
-   case GLUT_KEY_PAGE_DOWN: // Page-Down: decrease ball's radius
-      ballRadius *= 0.95;
-      ballXMin = clipAreaXLeft + ballRadius;
-      ballXMax = clipAreaXRight - ballRadius;
-      ballYMin = clipAreaYBottom + ballRadius;
-      ballYMax = clipAreaYTop - ballRadius;
       break;
    }
 }

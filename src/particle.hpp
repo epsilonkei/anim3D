@@ -1,3 +1,6 @@
+double grav = 9.8;
+Eigen::Vector3d e1(1,0,0), e2(0,1,0), e3(0,0,1);
+
 class particle {
 public:
   Eigen::Vector3d prev_pos, pos, vel, acc;
@@ -48,7 +51,8 @@ public:
   }
 
   void updateEuler(double dt) {
-    // this->acc = this->force / this->mass;
+    // this->force = - this->mass * grav * e3;
+    this->acc = this->force / this->mass;
     this->prev_pos = this->pos;
     this->vel += dt * this->acc;
     this->pos += dt * this->vel;
@@ -56,14 +60,36 @@ public:
     this->time += dt;
   }
 
+  void revertEuler(double dt) {
+    // this->force = - this->mass * grav * e3;
+    this->acc = this->force / this->mass;
+    this->time -= dt;
+    this->last_dt = dt;
+    this->pos -= dt * this->vel;
+    this->vel -= dt * this->acc;
+    this->prev_pos = this->pos - dt * this->vel;
+  }
+
   void updateVerlet(double dt) {
-    // this->acc = this->force / this->mass;
+    // this->force = - this->mass * grav * e3;
+    this->acc = this->force / this->mass;
     Eigen::Vector3d pos_buf = this->pos;
     this->pos += (this->pos - this->prev_pos) + dt * dt * this->acc;
     this->prev_pos = pos_buf;
     this->vel = (this->pos - this->prev_pos) / dt;
     this->last_dt = dt;
     this->time += dt;
+  }
+
+  void revertVerlet(double dt) {
+    // this->force = - this->mass * grav * e3;
+    this->time -= dt;
+    this->last_dt = dt;
+    this->acc = this->force / this->mass;
+    this->pos = this->prev_pos;
+    Eigen::Vector3d pos_buf = this->pos;
+    this->prev_pos = 2 * this->pos - pos_buf + dt * dt * this->acc;
+    this->vel = (this->pos - this->prev_pos) / dt;
   }
 
 };

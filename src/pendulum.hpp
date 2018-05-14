@@ -1,6 +1,9 @@
 #include "particle.hpp"
 #include <Eigen/Dense>
 
+extern double grav;
+extern Eigen::Vector3d e1, e2, e3;
+
 class pendulum {
 public:
   particle pt;
@@ -38,4 +41,58 @@ public:
     updateConstraint();
   }
 
+  void updateEulerForceBased(double dt) {
+    this->pt.force = - this->pt.mass * grav * e3;
+    Eigen::Vector3d pos_from_cent = this->pt.pos - this->fixed_point;
+    double alpha = - (this->pt.force.dot(pos_from_cent) +
+                      this->pt.mass * this->pt.vel.squaredNorm()) / (pos_from_cent.squaredNorm());
+    this->pt.force += alpha * pos_from_cent;
+    // this->pt.updateEuler(dt);
+    //
+    this->pt.acc = this->pt.force / this->pt.mass;
+    this->pt.prev_pos = this->pt.pos;
+    //
+    this->pt.vel += dt * this->pt.acc;
+    Eigen::Vector3d circum = this->pt.pos - this->fixed_point;
+    circum.normalized();
+    this->pt.vel -= this->pt.vel.dot(circum) * circum;
+    //
+    this->pt.pos += dt * this->pt.vel;
+    circum = this->pt.pos - this->fixed_point;
+    circum.normalized();
+    this->pt.pos = this->fixed_point + circum * this->wire_length;
+    //
+    this->pt.last_dt = dt;
+    this->pt.time += dt;
+    // Eigen::Vector3d circum = this->pt.pos / this->pt.pos.norm();
+    // this->pt.pos = this->pt.pos * (this->wire_length / this->pt.pos.norm());
+    // this->pt.vel -= this->pt.vel.dot(circum) * circum;
+    // std::cout << this->pt.pos.dot(this->pt.vel) << std::endl;
+    // updateConstraint();
+    // std::cout << "Energy: " << this->pt.vel.squaredNorm() + grav *this->pt.pos[2] << std::endl;
+  }
+
+    void updateVerletForceBased(double dt) {
+    this->pt.force = - this->pt.mass * grav * e3;
+    Eigen::Vector3d pos_from_cent = this->pt.pos - this->fixed_point;
+    double alpha = - (this->pt.force.dot(pos_from_cent) +
+                      this->pt.mass * this->pt.vel.squaredNorm()) / (pos_from_cent.squaredNorm());
+    this->pt.force += alpha * pos_from_cent;
+    // this->pt.updateVerlet(dt);
+    this->pt.acc = this->pt.force / this->pt.mass;
+    //
+    Eigen::Vector3d pos_buf = this->pt.pos;
+    this->pt.pos += (this->pt.pos - this->pt.prev_pos) + dt * dt * this->pt.acc;
+    Eigen::Vector3d circum = this->pt.pos - this->fixed_point;
+    circum.normalized();
+    this->pt.pos = this->fixed_point + circum * this->wire_length;
+    //
+    this->pt.prev_pos = pos_buf;
+    this->pt.vel = (this->pt.pos - this->pt.prev_pos) / dt;
+    this->pt.vel -= this->pt.vel.dot(circum) * circum;
+    //
+    this->pt.last_dt = dt;
+    this->pt.time += dt;
+    // std::cout << "Energy: " << this->pt.vel.squaredNorm() + grav *this->pt.pos[2] << std::endl;
+  }
 };

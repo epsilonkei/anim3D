@@ -20,7 +20,7 @@ public:
     return ((Ball1->pos - Ball2->pos).norm() < (Ball1->radius + Ball2->radius));
   }
 
-  void force_based_response(particle* Ball1,
+  void forceBasedResponse(particle* Ball1,
                             particle* Ball2) { // without considering collision timing
     // Push away form each other
     Eigen::Vector3d collide_dir = (Ball1->pos - Ball2->pos);
@@ -37,7 +37,7 @@ public:
     Ball2->prev_pos = Ball2->pos - Ball2->vel * Ball2->last_dt;
   }
 
-  void pos_based_response(particle* Ball1,
+  void posBasedResponse(particle* Ball1,
                           particle* Ball2) { // equal mass
     // Push away form each other
     Eigen::Vector3d collide_dir = (Ball1->pos - Ball2->pos);
@@ -61,13 +61,15 @@ public:
 
   void updateVerletAll(double dt) {
     for ( int i=0; i<this->pl.size(); i++ ) {
-      this->pl[i]->updateVerlet(dt);
+      // this->pl[i]->updateVerlet(dt);
+      this->pl[i]->updateVerletForceBased(dt);
     }
   }
 
   void updateEulerAll(double dt) {
     for ( int i=0; i<this->pl.size(); i++ ) {
-      this->pl[i]->updateEuler(dt);
+      // this->pl[i]->updateEuler(dt);
+      this->pl[i]->updateEulerForceBased(dt);
     }
   }
 
@@ -79,7 +81,7 @@ public:
     for ( int i=0; i<this->pl.size(); i++ ) {
       for ( int j=i+1; j<this->pl.size(); j++ ) {
         if (is_collided( &(this->pl[i]->pt), &(this->pl[j]->pt) )) {
-          pos_based_response( &(this->pl[i]->pt), &(this->pl[j]->pt) );
+          posBasedResponse( &(this->pl[i]->pt), &(this->pl[j]->pt) );
         }
       }
     }

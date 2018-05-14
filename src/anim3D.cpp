@@ -1,10 +1,13 @@
 #include <GL/glut.h>  // GLUT, include glu.h and gl.h
-#include <cmath>     // Needed for sin, cos
+#include <cmath>
 #include <Eigen/Dense>
 #include <iostream>
 #include "particle.hpp"
 #include "floor.hpp"
 #define PI 3.14159265
+
+extern double grav;
+extern Eigen::Vector3d e1, e2, e3;
 
 // Global variables
 char title[] = "Full-Screen & Windowed Mode";  // Windowed mode's title
@@ -15,11 +18,11 @@ int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
 double dt = refreshMillis * 1e-3;
-bool applyGravity = false;
+bool applyGravity = true;
 
 double ballMass = 1;
-double ballRadius = 0.2;   // Radius of the bouncing ballRadius
-double grav = -9.8;
+double ballRadius = 0.2;
+
 double prev_pos[] = {0,0,5}, pos[] = {0,0,5}, vel[] ={0,0,0}, acc[] = {0,0,0};
 particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 
@@ -27,7 +30,6 @@ double floor_elas = 1.0;
 double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
 static_floor Floor0(floor_org, floor_norm, floor_elas);
 
-double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
 static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
@@ -43,7 +45,6 @@ static const GLfloat mat_default_shininess[] = { 100.0 };
 static const GLfloat mat_default_emission[] = {0.0, 0.0, 0.0, 0.0};
 
 // Projection clipping area
-GLdouble clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop;
 bool fullScreenMode = false; // Full-screen or windowed mode?
 
 // Color for objects
@@ -70,12 +71,12 @@ void initGL() {
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
 
-  // Default material
-  // glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_default_color);
-  // glMaterialfv(GL_FRONT, GL_AMBIENT, mat_default_color);
-  // glMaterialfv(GL_FRONT, GL_SPECULAR, mat_default_specular);
-  // glMaterialfv(GL_FRONT, GL_SHININESS, mat_default_shininess);
   Ball.init();
+  if (applyGravity) {                     // Apply Gravity mode
+     Ball.force = - grav * e3;
+  } else {                                // Non-apply Gravity mode
+     Ball.force = Eigen::Vector3d::Zero();
+  }
 }
 
 void physics_calculate(){
@@ -127,12 +128,9 @@ void display() {
    draw_floor();
    draw_origin();
 
-   //glDisable(GL_LIGHTING);
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
-   // std::cout << Ball.vel[0] << ", " << Ball.vel[1] << ", " << Ball.vel[2] << std::endl;
    glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
-   glutSolidSphere (ballRadius, 16, 16);
-   //glEnable(GL_LIGHTING);
+   glutSolidSphere (Ball.radius, 16, 16);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
    physics_calculate();
 }
@@ -150,22 +148,6 @@ void reshape(GLsizei width, GLsizei height) {
    glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
    glLoadIdentity();             // Reset the projection matrix
    gluPerspective(60.0, aspect, 1.0, 60.0);
-   if (width >= height) {
-      clipAreaXLeft   = -1.0 * aspect;
-      clipAreaXRight  = 1.0 * aspect;
-      clipAreaYBottom = -1.0;
-      clipAreaYTop    = 1.0;
-   } else {
-      clipAreaXLeft   = -1.0;
-      clipAreaXRight  = 1.0;
-      clipAreaYBottom = -1.0 / aspect;
-      clipAreaYTop    = 1.0 / aspect;
-   }
-   // gluOrtho2D(clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop);
-   ballXMin = clipAreaXLeft + ballRadius;
-   ballXMax = clipAreaXRight - ballRadius;
-   ballYMin = clipAreaYBottom + ballRadius;
-   ballYMax = clipAreaYTop - ballRadius;
 }
 
 /* Called back when the timer expired */
@@ -183,9 +165,9 @@ void keyboard(unsigned char key, int x, int y) {
    case 'g':    // g: Apply gravity mode
       applyGravity = !applyGravity;         // Toggle state
       if (applyGravity) {                     // Apply Gravity mode
-         Ball.acc[2] = grav;
+         Ball.force = - grav * e3;
       } else {                                // Non-apply Gravity mode
-         Ball.acc[1] = 0;
+         Ball.force = Eigen::Vector3d::Zero();
       }
       break;
    case 'r':    // r: Reset default camera
@@ -211,26 +193,18 @@ void specialKeys(int key, int x, int y) {
       }
       break;
    case GLUT_KEY_RIGHT:    // Right: increase x speed
-      vel[0] += 0.002; break;
+      Ball.vel[0] += 0.002; break;
    case GLUT_KEY_LEFT:     // Left: decrease x speed
-      vel[0] -= 0.002; break;
+      Ball.vel[0] -= 0.002; break;
    case GLUT_KEY_UP:       // Up: increase y speed
-      vel[1] += 0.002; break;
+      Ball.vel[1] += 0.002; break;
    case GLUT_KEY_DOWN:     // Down: decrease y speed
-      vel[1] -= 0.002; break;
+      Ball.vel[1] -= 0.002; break;
    case GLUT_KEY_PAGE_UP:  // Page-Up: increase ball's radius
-      ballRadius *= 1.05;
-      ballXMin = clipAreaXLeft + ballRadius;
-      ballXMax = clipAreaXRight - ballRadius;
-      ballYMin = clipAreaYBottom + ballRadius;
-      ballYMax = clipAreaYTop - ballRadius;
+      Ball.radius *= 1.05;
       break;
    case GLUT_KEY_PAGE_DOWN: // Page-Down: decrease ball's radius
-      ballRadius *= 0.95;
-      ballXMin = clipAreaXLeft + ballRadius;
-      ballXMax = clipAreaXRight - ballRadius;
-      ballYMin = clipAreaYBottom + ballRadius;
-      ballYMax = clipAreaYTop - ballRadius;
+      Ball.radius *= 0.95;
       break;
    }
 }

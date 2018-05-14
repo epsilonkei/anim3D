@@ -39,11 +39,6 @@ static const GLfloat light_position[] = { 5.0, 5.0, 10.0, 1.0 };
 static const GLfloat light_ambient[] = {1.0, 1.0, 1.0, 1.0};
 static const GLfloat light_diffuse[] = {0.5, 0.5, 0.5, 1.0};
 
-static const GLfloat mat_default_color[] = { 1.0, 1.0, 1.0, 0.5 };
-static const GLfloat mat_default_specular[] = { 0.0, 0.0, 0.0, 0.0 };
-static const GLfloat mat_default_shininess[] = { 100.0 };
-static const GLfloat mat_default_emission[] = {0.0, 0.0, 0.0, 0.0};
-
 // Projection clipping area
 bool fullScreenMode = false; // Full-screen or windowed mode?
 

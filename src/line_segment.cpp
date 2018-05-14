@@ -180,7 +180,7 @@ void display() {
    glEnable(GL_COLOR_MATERIAL);
    glColor4f(0.9, 0.1, 0.1, 1.0); // red
    glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
-   glutSolidSphere (ballRadius, 16, 16);
+   glutSolidSphere (Ball.radius, 16, 16);
    glDisable(GL_COLOR_MATERIAL);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
 }
@@ -243,18 +243,18 @@ void specialKeys(int key, int x, int y) {
       }
       break;
    case GLUT_KEY_RIGHT:    // Right: increase x speed
-      vel[0] += 0.002; break;
+      Ball.vel[0] += 0.002; break;
    case GLUT_KEY_LEFT:     // Left: decrease x speed
-      vel[0] -= 0.002; break;
+      Ball.vel[0] -= 0.002; break;
    case GLUT_KEY_UP:       // Up: increase y speed
-      vel[1] += 0.002; break;
+      Ball.vel[1] += 0.002; break;
    case GLUT_KEY_DOWN:     // Down: decrease y speed
-      vel[1] -= 0.002; break;
+      Ball.vel[1] -= 0.002; break;
    case GLUT_KEY_PAGE_UP:  // Page-Up: increase ball's radius
-      ballRadius *= 1.05;
+      Ball.radius *= 1.05;
       break;
    case GLUT_KEY_PAGE_DOWN: // Page-Down: decrease ball's radius
-      ballRadius *= 0.95;
+      Ball.radius *= 0.95;
       break;
    }
 }

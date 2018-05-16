@@ -2,9 +2,15 @@
 #include <cmath>     // Needed for sin, cos
 #include <Eigen/Dense>
 #include <iostream>
+#include <fstream>
 // #include "pendulum.hpp"
 #include "pendulums.hpp"
 #define PI 3.14159265
+
+std::ofstream result_file;
+extern double grav;
+extern Eigen::Vector3d e1, e2, e3;
+double energy = 0;
 
 // Global variables
 extern double G_const;
@@ -17,11 +23,6 @@ int windowPosY   = 50;      // Windowed mode's top-left corner y
 int refreshMillis = 30;      // Refresh period in milliseconds
 // double dt = refreshMillis * 1e-3;
 double dt = 1e-3;
-bool applyGravity = false;
-
-double ballMass = 1;
-double ballRadius = 0.2;   // Radius of the bouncing ballRadius
-extern double grav;
 
 pendulums PL;
 
@@ -29,8 +30,7 @@ pendulums PL;
 double fpoint[N_ball][3], norm_vec[N_ball][3],
    prev_poss[N_ball][3], poss[N_ball][3], vels[N_ball][3], accs[N_ball][3];
 
-double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
-static double org_dist = 5.0, org_pitch = 60.0, org_yaw = 0.0;
+static double org_dist = 6.0, org_pitch = 60.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
@@ -39,13 +39,6 @@ static const GLfloat light_position[] = { 5.0, 5.0, 10.0, 1.0 };
 static const GLfloat light_ambient[] = {1.0, 1.0, 1.0, 1.0};
 static const GLfloat light_diffuse[] = {0.5, 0.5, 0.5, 1.0};
 
-static const GLfloat mat_default_color[] = { 1.0, 1.0, 1.0, 0.5 };
-static const GLfloat mat_default_specular[] = { 0.0, 0.0, 0.0, 0.0 };
-static const GLfloat mat_default_shininess[] = { 100.0 };
-static const GLfloat mat_default_emission[] = {0.0, 0.0, 0.0, 0.0};
-
-// Projection clipping area
-GLdouble clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop;
 bool fullScreenMode = false; // Full-screen or windowed mode?
 
 // Color for objects
@@ -76,7 +69,7 @@ void initGL() {
 
 void initSim() {
    double ball_radiuss = 0.2, ball_masss = 1, wl = 1, height = 2;
-   double init_angle = -30;
+   // double init_angle = -30;
    for (int i = 0; i < N_ball; i++) {
       norm_vec[i][0] = 0; norm_vec[i][1] = 1; norm_vec[i][2] = 0;
       // prev_poss[i][0] = (height - wl) * sin(init_angle);
@@ -96,13 +89,15 @@ void initSim() {
          vels[i][0] = 0;
       }
       vels[i][1] = 0; vels[i][2] = 0;
-      accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = -grav;
+      accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = 0;
       // accs[i] = {0,0,0}; only works with C++0x and above
       PL.add_pendulum(wl, fpoint[i], norm_vec[i], ball_masss, ball_radiuss, dt, prev_poss[i], poss[i], vels[i], accs[i]);
    }
    for (int i = 0; i < PL.pl.size(); i++) {
       PL.pl[i]->pt.init();
+      PL.pl[i]->pt.force = - PL.pl[i]->pt.mass * grav * e3;
    }
+   result_file.open("/tmp/newton_cradle_energy.dat");
 }
 
 void physics_calculate(){
@@ -110,6 +105,11 @@ void physics_calculate(){
    for (int i = 0; i < refreshMillis; i++) {
       PL.update(dt);
    }
+   energy = 0;
+   for (int i = 0; i < PL.pl.size(); i++) {
+      energy += PL.pl[i]->pt.mass * (PL.pl[i]->pt.vel.squaredNorm() + grav * PL.pl[i]->pt.pos[2]);
+   }
+   result_file << PL.pl[0]->pt.time << " " << energy << "\n";
 }
 
 void draw_pendulums(pendulums _PL){
@@ -193,22 +193,6 @@ void reshape(GLsizei width, GLsizei height) {
    glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
    glLoadIdentity();             // Reset the projection matrix
    gluPerspective(60.0, aspect, 1.0, 60.0);
-   if (width >= height) {
-      clipAreaXLeft   = -1.0 * aspect;
-      clipAreaXRight  = 1.0 * aspect;
-      clipAreaYBottom = -1.0;
-      clipAreaYTop    = 1.0;
-   } else {
-      clipAreaXLeft   = -1.0;
-      clipAreaXRight  = 1.0;
-      clipAreaYBottom = -1.0 / aspect;
-      clipAreaYTop    = 1.0 / aspect;
-   }
-   // gluOrtho2D(clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop);
-   ballXMin = clipAreaXLeft + ballRadius;
-   ballXMax = clipAreaXRight - ballRadius;
-   ballYMin = clipAreaYBottom + ballRadius;
-   ballYMax = clipAreaYTop - ballRadius;
 }
 
 /* Called back when the timer expired */
@@ -221,15 +205,8 @@ void Timer(int value) {
 void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
+      result_file.close();
       exit(0);
-      break;
-   case 'g':    // g: Apply gravity mode
-      applyGravity = !applyGravity;         // Toggle state
-      // if (applyGravity) {                     // Apply Gravity mode
-      //    Ball.acc[2] = grav;
-      // } else {                                // Non-apply Gravity mode
-      //    Ball.acc[1] = 0;
-      // }
       break;
    case 'r':    // r: Reset default camera
       distance = org_dist, pitch = org_pitch, yaw = org_yaw;
@@ -252,28 +229,6 @@ void specialKeys(int key, int x, int y) {
          glutReshapeWindow(windowWidth, windowHeight); // Switch into windowed mode
          glutPositionWindow(windowPosX, windowPosX);   // Position top-left corner
       }
-      break;
-   // case GLUT_KEY_RIGHT:    // Right: increase x speed
-   //    vel[0] += 0.002; break;
-   // case GLUT_KEY_LEFT:     // Left: decrease x speed
-   //    vel[0] -= 0.002; break;
-   // case GLUT_KEY_UP:       // Up: increase y speed
-   //    vel[1] += 0.002; break;
-   // case GLUT_KEY_DOWN:     // Down: decrease y speed
-   //    vel[1] -= 0.002; break;
-   case GLUT_KEY_PAGE_UP:  // Page-Up: increase ball's radius
-      ballRadius *= 1.05;
-      ballXMin = clipAreaXLeft + ballRadius;
-      ballXMax = clipAreaXRight - ballRadius;
-      ballYMin = clipAreaYBottom + ballRadius;
-      ballYMax = clipAreaYTop - ballRadius;
-      break;
-   case GLUT_KEY_PAGE_DOWN: // Page-Down: decrease ball's radius
-      ballRadius *= 0.95;
-      ballXMin = clipAreaXLeft + ballRadius;
-      ballXMax = clipAreaXRight - ballRadius;
-      ballYMin = clipAreaYBottom + ballRadius;
-      ballYMax = clipAreaYTop - ballRadius;
       break;
    }
 }

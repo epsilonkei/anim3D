@@ -32,7 +32,7 @@ particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 double start[] = {0,0,-5}, end[] = {0,0,5}, line_length = 10;
 line_segment Line0(start, end);
 
-static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
+static double org_dist = 10.0, org_pitch = 80.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
@@ -73,7 +73,7 @@ void initGL() {
 
   Ball.init();
   if (applyGravity) {                     // Apply Gravity mode
-     Ball.force = - grav * e3;
+     Ball.force = - 0.05 * Ball.mass * grav * e3;
   } else {                                // Non-apply Gravity mode
      Ball.force = Eigen::Vector3d::Zero();
   }
@@ -100,29 +100,22 @@ void physics_calculate(){
    double pos_on_line = (Ball.pos - cent).dot(line_dir);
    line_dir = (Line0.end - Line0.start).normalized();
    Ball.pos = cent * 0.5 + line_dir * pos_on_line;
+   Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
 
    // Animation Control - compute the location for the next refresh
-   Ball.updateEuler(dt);
-   // Ball.updateVerlet(dt);
-
-   // Floor collision
-   // double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
-   // if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
-   //    Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
-   //    Ball.pos -= Floor0.norm_vec * dist_to_floor;
-   //    Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
-   // }
+   // Ball.updateEuler(dt);
+   Ball.updateVerlet(dt);
 
    // Project to movement to line
    Eigen::Vector3d dx = Ball.pos - Ball.prev_pos;
    dx = dx.dot(line_dir) * line_dir;
-   Ball.pos = Ball.prev_pos + dx; // Project to movement to line
+   Ball.pos = Ball.prev_pos + dx; // Project to particle movement to line
    Eigen::Vector3d start_to_Ball = Ball.pos - Line0.start;
    double dist_on_line = start_to_Ball.dot(line_dir);
    if (dist_on_line < 0) {
       Ball.pos = Line0.start; // If ball goes over start point of Line, move ball to start point
    } else if (dist_on_line > (Line0.end - Line0.start).norm()){
-      Ball.pos = Line0.end;
+      Ball.pos = Line0.end; // If ball goes over end point of Line, move ball to end point
    }
 }
 
@@ -170,7 +163,7 @@ void display() {
    glRotatef( -pitch, 1.0, 0.0, 0.0 );
    glRotatef( -yaw, 0.0, 1.0, 0.0 );
    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-   draw_floor();
+   // draw_floor();
    draw_origin();
    // Line0.rotate(0.5*dt, e2);
    physics_calculate();
@@ -180,7 +173,7 @@ void display() {
    glEnable(GL_COLOR_MATERIAL);
    glColor4f(0.9, 0.1, 0.1, 1.0); // red
    glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
-   glutSolidSphere (Ball.radius, 16, 16);
+   glutSolidSphere (Ball.radius, 32, 32);
    glDisable(GL_COLOR_MATERIAL);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
 }
@@ -215,7 +208,7 @@ void keyboard(unsigned char key, int x, int y) {
    case 'g':    // g: Apply gravity mode
       applyGravity = !applyGravity;         // Toggle state
       if (applyGravity) {                     // Apply Gravity mode
-         Ball.force = - grav * e3;
+         Ball.force = - 0.05 * Ball.mass * grav * e3;
       } else {                                // Non-apply Gravity mode
          Ball.force = Eigen::Vector3d::Zero();
       }

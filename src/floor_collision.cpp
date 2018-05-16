@@ -4,8 +4,10 @@
 #include <iostream>
 #include "particle.hpp"
 #include "floor.hpp"
+#include <fstream>
 #define PI 3.14159265
 
+std::ofstream result_file;
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
@@ -17,7 +19,8 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = refreshMillis * 1e-3;
+// double dt = refreshMillis * 1e-3;
+double dt = 1e-3;
 bool applyGravity = true;
 
 double ballMass = 1;
@@ -30,7 +33,7 @@ double floor_elas = 1.0;
 double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
 static_floor Floor0(floor_org, floor_norm, floor_elas);
 
-static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
+static double org_dist = 10.0, org_pitch = 80.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
@@ -68,23 +71,32 @@ void initGL() {
 
   Ball.init();
   if (applyGravity) {                     // Apply Gravity mode
-     Ball.force = - grav * e3;
+     Ball.force = - Ball.mass * grav * e3;
   } else {                                // Non-apply Gravity mode
      Ball.force = Eigen::Vector3d::Zero();
   }
+  result_file.open("/tmp/floor_collision_Euler.dat");
 }
 
 void physics_calculate(){
-   // Animation Control - compute the location for the next refresh
-   // Ball.updateEuler(dt);
-   Ball.updateVerlet(dt);
-   // Check if the ball collides the floor
-   double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
-   if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
-      Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
-      Ball.pos -= Floor0.norm_vec * dist_to_floor;
-      Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
+   for (int i = 0; i < refreshMillis; i++) {
+      // Animation Control - compute the location for the next refresh
+      Ball.updateEuler(dt);
+      // Ball.updateVerlet(dt);
+      // Check if the ball collides the floor
+      double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
+      if (dist_to_floor < 0) { //&& Floor0.norm_vec.dot(Ball.vel) < 0) {
+         // Force based
+         Ball.pos -= Floor0.norm_vec * dist_to_floor;
+         Eigen::Vector3d vel_on_norm = Ball.vel.dot(Floor0.norm_vec) * Floor0.norm_vec;
+         Eigen::Vector3d vel_other = Ball.vel - vel_on_norm;
+         Ball.vel = vel_other - vel_on_norm * Floor0.elasticity;
+         // Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
+         Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
+      }
    }
+   result_file << Ball.time << " " << Ball.pos[0] << " "
+               << Ball.pos[1] << " " << Ball.pos[2] << "\n";
 }
 
 void draw_floor(){
@@ -125,7 +137,7 @@ void display() {
    // Draw particle
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
    glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
-   glutSolidSphere (Ball.radius, 16, 16);
+   glutSolidSphere (Ball.radius, 32, 32);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
    physics_calculate();
 }
@@ -155,12 +167,13 @@ void Timer(int value) {
 void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
+      result_file.close();
       exit(0);
       break;
    case 'g':    // g: Apply gravity mode
       applyGravity = !applyGravity;         // Toggle state
       if (applyGravity) {                     // Apply Gravity mode
-         Ball.force = - grav * e3;
+         Ball.force = - Ball.mass * grav * e3;
       } else {                                // Non-apply Gravity mode
          Ball.force = Eigen::Vector3d::Zero();
       }

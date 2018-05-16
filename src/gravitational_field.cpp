@@ -8,6 +8,8 @@
 
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
+double sum_time = 0;
+int N_iterate = 0;
 
 // Global variables
 extern double G_const;
@@ -24,10 +26,10 @@ bool applyGravity = false;
 double table_length = 10;
 particles PL(table_length);
 
-#define N_ball 3
+#define N_ball 100
 double prev_poss[N_ball][3], poss[N_ball][3], vels[N_ball][3], accs[N_ball][3];
 
-static double org_dist = 15.0, org_pitch = 20.0, org_yaw = 0.0;
+static double org_dist = 19.0, org_pitch = 10.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
@@ -65,14 +67,16 @@ void initGL() {
 }
 
 void initSim() {
-   double ball_radiuss = 0.2, ball_masss = 1;
    double tbl = PL.table_length;
+   // double ball_radiuss = 0.1, ball_masss = 1;
+   double ball_radiuss = std::min(0.2, tbl * 10/N_ball), ball_masss = 1;
    srand(0);
    for (int i = 0; i < N_ball; i++) {
-      prev_poss[i][0] = i * 0.5 - 3; prev_poss[i][1] = 0; prev_poss[i][2] = ball_radiuss;
+      // prev_poss[i][0] = i * 0.5 - 3; prev_poss[i][1] = 0; prev_poss[i][2] = ball_radiuss;
       poss[i][0] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
       poss[i][1] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
       poss[i][2] = ball_radiuss;
+      prev_poss[i][0] = poss[i][0]; prev_poss[i][1] = poss[i][1]; prev_poss[i][2] = poss[i][2];
       vels[i][0] = 0; vels[i][1] = 0; vels[i][2] = 0;
       accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = 0;
       // accs[i] = {0,0,0}; only works with C++0x and above
@@ -83,9 +87,25 @@ void initSim() {
    }
 }
 
+struct timespec startTime, endTime;
+
 void physics_calculate(){
    // Animation Control - compute the location for the next Refresh
-   PL.updateWithGravitationalForce(dt);
+   // PL.updateWithGravitationalForce(dt);
+   clock_gettime(CLOCK_REALTIME, &startTime);
+   //
+   PL.setGravitationalForceAll();
+   //
+   clock_gettime(CLOCK_REALTIME, &endTime);
+   sum_time += (double)(endTime.tv_sec - startTime.tv_sec + (endTime.tv_nsec - startTime.tv_nsec) * 1e-9);
+   N_iterate += 1;
+   //
+   PL.updateVerletAll(dt);
+   PL.checkBounceCollideAll();
+   // if (N_iterate > 20) {
+   //    std::cout << "Average time: " << (sum_time / N_iterate) << " [sec]" << std::endl;
+   //    exit(0);
+   // }
 }
 
 void draw_particles(particles _PL){
@@ -186,16 +206,17 @@ void reshape(GLsizei width, GLsizei height) {
    gluPerspective(60.0, aspect, 1.0, 60.0);
 }
 
-/* Called back when the timer expired */
-void Timer(int value) {
-   glutPostRedisplay();    // Post a paint request to activate display()
-   glutTimerFunc(refreshMillis, Timer, 0); // subsequent timer call at milliseconds
-}
+// /* Called back when the timer expired */
+// void Timer(int value) {
+//    glutPostRedisplay();    // Post a paint request to activate display()
+//    glutTimerFunc(refreshMillis, Timer, 0); // subsequent timer call at milliseconds
+// }
 
 /* Callback handler for normal-key event */
 void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
+      std::cout << "Average time: " << (sum_time / N_iterate) << " [sec]" << std::endl;
       exit(0);
       break;
    case 'r':    // r: Reset default camera
@@ -273,7 +294,7 @@ int main(int argc, char** argv) {
    glutCreateWindow(title);      // Create window with given title
    glutDisplayFunc(display);     // Register callback handler for window re-paint
    glutReshapeFunc(reshape);     // Register callback handler for window re-shape
-   glutTimerFunc(0, Timer, 0);   // First timer call immediately
+   // glutTimerFunc(0, Timer, 0);   // First timer call immediately
    glutSpecialFunc(specialKeys); // Register callback handler for special-key event
    glutKeyboardFunc(keyboard);   // Register callback handler for special-key event
    glutIdleFunc(idle);

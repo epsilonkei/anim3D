@@ -18,21 +18,14 @@ int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
 double dt = refreshMillis * 1e-3;
-bool applyGravity = false;
-
-double ballMass = 1;
-double ballRadius = 0.2;   // Radius of the bouncing ballRadius
-// double prev_pos[] = {0,0,5}, pos[] = {0,0,5}, vel[] ={0,0,0}, acc[] = {0,0,0};
-// particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 
 double table_length = 5;
 particles BT(table_length);
 
-#define N_ball 10
+#define N_ball 15
 double prev_poss[N_ball][3], poss[N_ball][3], vels[N_ball][3], accs[N_ball][3];
 
-double ballXMax, ballXMin, ballYMax, ballYMin; // Ball's center (x, y) bounds
-static double org_dist = 10.0, org_pitch = 20.0, org_yaw = 0.0;
+static double org_dist = 11.0, org_pitch = 20.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;
@@ -78,9 +71,15 @@ void initGL() {
 
 void initSim() {
    double ball_radiuss = 0.2, ball_masss = 1;
+   double tbl = BT.table_length;
+   srand(0);
    for (int i = 0; i < N_ball; i++) {
-      prev_poss[i][0] = i * 0.5 - 3; prev_poss[i][1] = 0; prev_poss[i][2] = ball_radiuss;
-      poss[i][0] = i * 0.5 - 3; poss[i][1] = 0; poss[i][2] = ball_radiuss;
+      poss[i][0] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
+      poss[i][1] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
+      poss[i][2] = ball_radiuss;
+      prev_poss[i][0] = poss[i][0]; prev_poss[i][1] = poss[i][1]; prev_poss[i][2] = poss[i][2];
+      // prev_poss[i][0] = i * 0.5 - 3; prev_poss[i][1] = 0; prev_poss[i][2] = ball_radiuss;
+      // poss[i][0] = i * 0.5 - 3; poss[i][1] = 0; poss[i][2] = ball_radiuss;
       vels[i][0] = i * 0.5; vels[i][1] = i * 0.1 + 0.5; vels[i][2] = 0;
       accs[i][0] = 0; accs[i][1] = 0; accs[i][2] = 0;
       // accs[i] = {0,0,0}; only works with C++0x and above
@@ -134,7 +133,7 @@ void draw_particles(particles _BT){
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[i % (sizeof(color)/sizeof(*color))]);
       // glTranslatef(_BT.pl[i].pos[0], _BT.pl[i].pos[1], _BT.pl[i].pos[2]);
       glTranslatef(_BT.pl[i]->pos[0], _BT.pl[i]->pos[1], _BT.pl[i]->pos[2]);
-      glutSolidSphere (_BT.pl[i]->radius, 16, 16);
+      glutSolidSphere (_BT.pl[i]->radius, 32, 32);
       glPopMatrix();
    }
 }

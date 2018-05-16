@@ -4,9 +4,9 @@
 #include <Eigen/Dense>
 #include "node.hpp"
 
-double G_CONST = 6.67408e-1; // 6.67408e-11
-double EPSILON = 1e-3;
-double FAR_ENOUGH_THRE = 0;
+double G_CONST = 6.67408e-3; // 6.67408e-11
+double EPSILON = 1e-2;
+double FAR_ENOUGH_THRE = 0.5;
 double COLLIDE_THRE = 1e-6;
 
 class particles {
@@ -144,14 +144,15 @@ public:
   void setGravitationalForceAll() {
     for ( int i=0; i<this->pl.size(); i++ ) {
       // Reset all force/acc to zero
-      this->pl[i]->acc = Eigen::Vector3d::Zero();
+      this->pl[i]->force = Eigen::Vector3d::Zero();
+      // this->pl[i]->acc = Eigen::Vector3d::Zero();
       for ( int j=0; j<this->pl.size(); j++ ) {
         if ( i == j ) continue;
         Eigen::Vector3d dist_vec = (this->pl[j]->pos - this->pl[i]->pos);
         double dist = std::max(dist_vec.norm(), EPSILON); // Deal with too small distance problem
-        // this->pl[i]->force += G_CONST * this->pl[i]->mass * this->pl[j]->mass
-        //  / (dist * dist * dist) * dist_vec;
-        this->pl[i]->acc += G_CONST * this->pl[j]->mass / (dist * dist * dist) * dist_vec;
+        this->pl[i]->force += G_CONST * this->pl[i]->mass * this->pl[j]->mass
+         / (dist * dist * dist) * dist_vec;
+        // this->pl[i]->acc += G_CONST * this->pl[j]->mass / (dist * dist * dist) * dist_vec;
       }
     }
   }
@@ -164,7 +165,9 @@ public:
       dist_vec = (com - this->pl[pid]->pos);
       dist = std::max(dist_vec.norm(), EPSILON); // Deal with too small distance problem
       if (_node->size / dist < FAR_ENOUGH_THRE) {
-        this->pl[pid]->acc += G_CONST * _node->mass / (dist * dist * dist) * dist_vec;
+        this->pl[pid]->force += G_CONST * this->pl[pid]->mass * _node->mass
+          / (dist * dist * dist) * dist_vec;
+        // this->pl[pid]->acc += G_CONST * _node->mass / (dist * dist * dist) * dist_vec;
       } else {
         for (int i=0; i < _node->childs.size(); i++) {
           calcForceFromNode(pid, _node->childs[i]);
@@ -173,20 +176,24 @@ public:
     } else if (_node->p_id != -1 and _node->p_id != pid) {
       dist_vec = (this->pl[_node->p_id]->pos - this->pl[pid]->pos);
       dist = std::max(dist_vec.norm(), EPSILON); // Deal with too small distance problem
-      this->pl[pid]->acc += G_CONST * this->pl[_node->p_id]->mass / (dist * dist * dist) * dist_vec;
+      this->pl[pid]->force += G_CONST * this->pl[pid]->mass * this->pl[_node->p_id]->mass
+        / (dist * dist * dist) * dist_vec;
+      // this->pl[pid]->acc += G_CONST * this->pl[_node->p_id]->mass / (dist * dist * dist) * dist_vec;
     }
   }
 
   void setGravitationalForceAllWithBHAlg() {
     // Create quadtree
-    boost::shared_ptr<node> root(new node(2 * this->table_length, -this->table_length, -this->table_length));
+    boost::shared_ptr<node> root(new node(2 * this->table_length,
+                                          -this->table_length, -this->table_length));
     for ( int i=0; i<this->pl.size(); i++ ) {
       root->add_particle(i, pl);
     }
     // Calculate gravitational force
     for ( int i=0; i<this->pl.size(); i++ ) {
       // Reset all force/acc to zero
-      this->pl[i]->acc = Eigen::Vector3d::Zero();
+      // this->pl[i]->acc = Eigen::Vector3d::Zero();
+      this->pl[i]->force = Eigen::Vector3d::Zero();
       calcForceFromNode(i, root);
     }
   }
@@ -205,8 +212,8 @@ public:
   }
 
   void updateWithGravitationalForce(double dt) {
-    // setGravitationalForceAll();
-    setGravitationalForceAllWithBHAlg();
+    setGravitationalForceAll();
+    // setGravitationalForceAllWithBHAlg();
     updateVerletAll(dt);
     // updateEulerAll(dt);
     // for ( int i=0; i<this->pl.size(); i++ ) {

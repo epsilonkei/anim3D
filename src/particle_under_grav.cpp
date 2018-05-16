@@ -4,8 +4,10 @@
 #include <iostream>
 #include "particle.hpp"
 #include "floor.hpp"
+#include <fstream>
 #define PI 3.14159265
 
+std::ofstream result_file;
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
@@ -18,7 +20,7 @@ int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
 // double dt = refreshMillis * 1e-3;
-double dt = 1e-2;
+double dt = 0.5 * 1e-2;
 bool applyGravity = true;
 
 double ballMass = 1;
@@ -68,10 +70,11 @@ void initGL() {
 
   Ball.init();
   if (applyGravity) {                     // Apply Gravity mode
-     Ball.force = - grav * e3;
+     Ball.force = - Ball.mass * grav * e3;
   } else {                                // Non-apply Gravity mode
      Ball.force = Eigen::Vector3d::Zero();
   }
+  result_file.open("/tmp/particle_under_grav_Verlet.dat");
 }
 
 void physics_calculate(){
@@ -85,6 +88,8 @@ void physics_calculate(){
    //    Ball.pos -= Floor0.norm_vec * dist_to_floor;
    //    Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
    // }
+   result_file << Ball.time << " " << Ball.pos[0] << " "
+               << Ball.pos[1] << " " << Ball.pos[2] << "\n";
 }
 
 void draw_floor(){
@@ -125,7 +130,7 @@ void display() {
    // Draw particle
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
    glTranslatef(Ball.pos[0], Ball.pos[1], Ball.pos[2]);  // Translate to (xPos, yPos, zPos)
-   glutSolidSphere (Ball.radius, 16, 16);
+   glutSolidSphere (Ball.radius, 32, 32);
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
    physics_calculate();
 }
@@ -155,12 +160,13 @@ void Timer(int value) {
 void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
+      result_file.close();
       exit(0);
       break;
    case 'g':    // g: Apply gravity mode
       applyGravity = !applyGravity;         // Toggle state
       if (applyGravity) {                     // Apply Gravity mode
-         Ball.force = - grav * e3;
+         Ball.force = - Ball.mass * grav * e3;
       } else {                                // Non-apply Gravity mode
          Ball.force = Eigen::Vector3d::Zero();
       }

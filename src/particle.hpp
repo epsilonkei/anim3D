@@ -3,7 +3,7 @@ Eigen::Vector3d e1(1,0,0), e2(0,1,0), e3(0,0,1);
 
 class particle {
 public:
-  Eigen::Vector3d prev_pos, pos, vel, acc;
+  Eigen::Vector3d prev_pos, pos, pos_to_cent, vel, acc;
   double mass, radius;
   Eigen::Vector3d force;
   // buf
@@ -15,6 +15,7 @@ public:
       pos(Eigen::Map<Eigen::Vector3d>(_pos,3)),
       vel(Eigen::Map<Eigen::Vector3d>(_vel,3)),
       acc(Eigen::Map<Eigen::Vector3d>(_acc,3)),
+      pos_to_cent(Eigen::Vector3d::Zero()),
       mass(_mass), radius(_radius), last_dt(_last_dt), time(0),
       force(Eigen::Vector3d::Zero())
   {}

@@ -102,7 +102,9 @@ void initSim() {
    }
    for (int i = 0; i < FLR.rl[0]->pl.size(); i++) {
       FLR.rl[0]->pl[i]->init();
+      FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
    }
+   FLR.rl[0]->init();
    // for floor
    floor_elass[0] = 1;
    floor_orgs[0][0] = floor_orgs[0][1] = floor_orgs[0][2] = 0;
@@ -111,22 +113,7 @@ void initSim() {
 }
 
 void physics_calculate(){
-   // for (int i = 0; i < refreshMillis; i++) {
-   //    // Animation Control - compute the location for the next refresh
-   //    Ball.updateEuler(dt);
-   //    // Ball.updateVerlet(dt);
-   //    // Check if the ball collides the floor
-   //    double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
-   //    if (dist_to_floor < 0) { //&& Floor0.norm_vec.dot(Ball.vel) < 0) {
-   //       // Force based
-   //       Ball.pos -= Floor0.norm_vec * dist_to_floor;
-   //       Eigen::Vector3d vel_on_norm = Ball.vel.dot(Floor0.norm_vec) * Floor0.norm_vec;
-   //       Eigen::Vector3d vel_other = Ball.vel - vel_on_norm;
-   //       Ball.vel = vel_other - vel_on_norm * Floor0.elasticity;
-   //       // Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
-   //       Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
-   //    }
-   // }
+   FLR.update_movement(dt);
 }
 
 void draw_floor(){

@@ -19,10 +19,10 @@ public:
   Eigen::Vector3d force, torque;
   Eigen::Vector3d lin_moment, ang_moment;
   //
-  double last_dt, time;
+  double max_radius;
 
   rigid_body()
-    : vel(Eigen::Vector3d::Zero())
+    : vel(Eigen::Vector3d::Zero()), omega(Eigen::Vector3d::Zero()), max_radius(0)
   {}
   ~ rigid_body() {}
 
@@ -39,23 +39,24 @@ public:
       this->mass += this->pl[i]->mass;
     }
     this->com /= this->mass;
-    this->I_body += Eigen::Matrix3d::Zero();
+    this->I_body = Eigen::Matrix3d::Zero();
+    // this->lin_moment = Eigen::Vector3d::Zero();
     //
     for (int i=0; i<this->pl.size(); i++) {
       // Update particles relative pos to center
       this->pl[i]->pos_to_cent = this->pl[i]->pos - this->com;
+      if (this->pl[i]->pos_to_cent.norm() > this->max_radius)
+        this->max_radius = this->pl[i]->pos_to_cent.norm();
       // Calculate I_body
       this->I_body +=  this->pl[i]->mass * (this->pl[i]->pos_to_cent.squaredNorm() * Eigen::Matrix3d::Identity() - this->pl[i]->pos_to_cent * this->pl[i]->pos_to_cent.transpose());
+      // Calculate initial linear momentum based on particles
+      // this->lin_moment += this->pl[i]->mass * this->pl[i]->vel;
     }
     this->I_body_inv = this->I_body.inverse();
     // Calculate initial linear momentum and angular momentum
     this->rotation = Eigen::Matrix3d::Identity();
-    // this->lin_moment = Eigen::Vector3d::Zero();
-    for (int i=0; i<this->pl.size(); i++) {
-      // this->lin_moment += this->pl[i]->mass * this->pl[i]->vel;
-      // this->ang_moment = this->rotation * this->I_body * this->rotation.transpose() * this->omega;
-      this->ang_moment = this->I_body * this->omega;
-    }
+    // this->ang_moment = this->rotation * this->I_body * this->rotation.transpose() * this->omega;
+    this->ang_moment = this->I_body * this->omega;
     this->lin_moment += this->mass * this->vel;
   }
 

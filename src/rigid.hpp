@@ -14,7 +14,7 @@ public:
   Eigen::Matrix3d I_body, I_body_inv, I_inv;
   //
   Eigen::Vector3d com, prev_com;
-  Eigen::Vector3d vel, omega;
+  Eigen::Vector3d vel, omega, angle;
   //
   Eigen::Vector3d force, torque;
   Eigen::Vector3d lin_moment, ang_moment;
@@ -74,8 +74,13 @@ public:
     this->com += this->vel * dt;
     this->I_inv = this->rotation * this -> I_body_inv * this->rotation.transpose();
     this->omega = this->I_inv * this->ang_moment;
+    double rot = this->omega.norm();
+    if ( dt*rot > 0.0 ) {
+      Eigen::Matrix3d dR = Eigen::AngleAxisd(dt*rot, this->omega/rot).toRotationMatrix();
+      this->rotation = dR * this->rotation;
+    }
     infinite_sigmal_matrix(this->omega, &this->omegax);
-    this->rotation += this->omegax * this->rotation * dt;
+    // this->rotation += this->omegax * this->rotation * dt;
   }
 
   void infinite_sigmal_matrix(Eigen::Vector3d &v, Eigen::Matrix3d *ret) {
@@ -86,9 +91,12 @@ public:
 
   void update_particles_movement() {
     for (int i=0; i<this->pl.size(); i++) {
-      // ri = R * r0i + x
+      // r_i = R * r0_i + x
       this->pl[i]->pos = this->rotation * this->pl[i]->pos_to_cent + this->com;
-      this->pl[i]->vel = this->vel;
+      // rdot_i = omega x R * r0_i + v = omega x (r_i - x) + v
+      // this->pl[i]->vel = this->omegax * this->rotation * this->pl[i]->pos_to_cent + this->vel;
+      this->pl[i]->vel = this->omegax * (this->pl[i]->pos - this->com) + this->vel;
     }
+    // std::cerr << this->pl[0]->pos_to_cent.transpose() << std::endl;
   }
 };

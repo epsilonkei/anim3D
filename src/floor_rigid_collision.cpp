@@ -22,7 +22,7 @@ bool applyGravity = true;
 
 #define N_part_per_rigid 8
 #define N_rigid 1
-double part_mass = 1, part_radius = 0.1, height = 2;
+double part_mass = 1, part_radius = 0.1, rigid_height = 2;
 double prev_poss[N_part_per_rigid * N_rigid][3], poss[N_part_per_rigid * N_rigid][3],
    vels[N_part_per_rigid * N_rigid][3], accs[N_part_per_rigid * N_rigid][3];
 
@@ -75,21 +75,21 @@ void initSim() {
    for (int i = 0; i < N_rigid; i++) {
       for (int j = 0; j < N_part_per_rigid; j++) {
          if (j == 0) {
-            poss[i*8+j][0] = 0; poss[i*8+j][1] = 0; poss[i*8+j][2] = height;
+            poss[i*8+j][0] = 0; poss[i*8+j][1] = 0; poss[i*8+j][2] = rigid_height;
          } else if (j == 1) {
-            poss[i*8+j][0] = 0; poss[i*8+j][1] = rgl; poss[i*8+j][2] = height;
+            poss[i*8+j][0] = 0; poss[i*8+j][1] = rgl; poss[i*8+j][2] = rigid_height;
          } else if (j == 2) {
-            poss[i*8+j][0] = rgl; poss[i*8+j][1] = rgl; poss[i*8+j][2] = height;
+            poss[i*8+j][0] = rgl; poss[i*8+j][1] = rgl; poss[i*8+j][2] = rigid_height;
          } else if (j == 3) {
-            poss[i*8+j][0] = rgl; poss[i*8+j][1] = 0; poss[i*8+j][2] = height;
+            poss[i*8+j][0] = rgl; poss[i*8+j][1] = 0; poss[i*8+j][2] = rigid_height;
          } else if (j == 4) { //
-            poss[i*8+j][0] = 0; poss[i*8+j][1] = 0; poss[i*8+j][2] = height + rgl;
+            poss[i*8+j][0] = 0; poss[i*8+j][1] = 0; poss[i*8+j][2] = rigid_height + rgl;
          } else if (j == 5) {
-            poss[i*8+j][0] = 0; poss[i*8+j][1] = rgl; poss[i*8+j][2] = height + rgl;
+            poss[i*8+j][0] = 0; poss[i*8+j][1] = rgl; poss[i*8+j][2] = rigid_height + rgl;
          } else if (j == 6) {
-            poss[i*8+j][0] = rgl; poss[i*8+j][1] = rgl; poss[i*8+j][2] = height + rgl;
+            poss[i*8+j][0] = rgl; poss[i*8+j][1] = rgl; poss[i*8+j][2] = rigid_height + rgl;
          } else if (j == 7) {
-            poss[i*8+j][0] = rgl; poss[i*8+j][1] = 0; poss[i*8+j][2] = height + rgl;
+            poss[i*8+j][0] = rgl; poss[i*8+j][1] = 0; poss[i*8+j][2] = rigid_height + rgl;
          }
          prev_poss[i*8+j][0] = poss[i*8+j][0];
          prev_poss[i*8+j][1] = poss[i*8+j][1];

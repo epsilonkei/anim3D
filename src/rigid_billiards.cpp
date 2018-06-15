@@ -127,10 +127,11 @@ void initSim() {
    for (int i = 0; i < FLR.rl.size(); i++) {
       for (int j = 0; j < FLR.rl[i]->pl.size(); j++) {
          FLR.rl[i]->pl[j]->init();
-         // Eigen::Vector3d tmp (0.1, 0.2, 0);
-         // FLR.rl[i]->omega = tmp;
          // // FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
       }
+      Eigen::Vector3d tmp_omega (0.1, 0.2, 0.1), tmp_vel(0.1, 0.2, 0);
+      FLR.rl[i]->omega = tmp_omega;
+      FLR.rl[i]->vel = tmp_vel;
       FLR.rl[i]->init();
    }
    // for floor

@@ -21,7 +21,9 @@ public:
   //
   double last_dt, time;
 
-  rigid_body() {}
+  rigid_body()
+    : vel(Eigen::Vector3d::Zero())
+  {}
   ~ rigid_body() {}
 
   void add_particle(double _mass, double _radius, double _last_dt, double* _prev_pos, double* _pos, double* _vel, double* _acc) {
@@ -48,12 +50,13 @@ public:
     this->I_body_inv = this->I_body.inverse();
     // Calculate initial linear momentum and angular momentum
     this->rotation = Eigen::Matrix3d::Identity();
-    this->lin_moment = Eigen::Vector3d::Zero();
+    // this->lin_moment = Eigen::Vector3d::Zero();
     for (int i=0; i<this->pl.size(); i++) {
-      this->lin_moment += this->pl[i]->mass * this->pl[i]->vel;
+      // this->lin_moment += this->pl[i]->mass * this->pl[i]->vel;
       // this->ang_moment = this->rotation * this->I_body * this->rotation.transpose() * this->omega;
       this->ang_moment = this->I_body * this->omega;
     }
+    this->lin_moment += this->mass * this->vel;
   }
 
   void update_rigid_movement(double dt) {

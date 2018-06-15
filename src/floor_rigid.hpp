@@ -28,8 +28,8 @@ public:
 
   void floor_collision_penalty(boost::shared_ptr<particle>& part) {
     for (int k=0; k<this->floors.size(); k++) {
-      double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin);
-      //- part.radius;
+      double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
+        - part->radius;
       part->force = -part->mass * grav * e3;
       if (dist_to_floor < 0) {
         part->force += (- DGAIN*dist_to_floor - VGAIN*

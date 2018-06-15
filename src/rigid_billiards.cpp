@@ -23,7 +23,7 @@ bool applyGravity = true;
 #define table_length 5
 
 #define N_part_per_rigid 8
-#define N_rigid 1
+#define N_rigid 3
 double part_mass = 1, part_radius = 0.1, rigid_height = 0.1;
 double prev_poss[N_part_per_rigid * N_rigid][3], poss[N_part_per_rigid * N_rigid][3],
    vels[N_part_per_rigid * N_rigid][3], accs[N_part_per_rigid * N_rigid][3];
@@ -78,9 +78,13 @@ void initGL() {
   glEnable(GL_LIGHT0);
 }
 
-void initRigid(double com_x, double com_y, double rgl) {
+void initRigids() {
    // for rigids
+   srand(0);
+   double com_x, com_y, rgl = 0.4;
    for (int i = 0; i < N_rigid; i++) {
+      com_x = double(rand()) / RAND_MAX * 2 * table_length - table_length;
+      com_y = double(rand()) / RAND_MAX * 2 * table_length - table_length;
       for (int j = 0; j < N_part_per_rigid; j++) {
          if (j == 0) {
             poss[i*8+j][0] = com_x - 0.5*rgl; poss[i*8+j][1] = com_y - 0.5*rgl;
@@ -113,20 +117,22 @@ void initRigid(double com_x, double com_y, double rgl) {
          vels[i*8+j][0] = 0; vels[i*8+j][1] = 0; vels[i*8+j][2] = 0;
          accs[i*8+j][0] = 0; accs[i*8+j][1] = 0; accs[i*8+j][2] = 0;
          FLR.add_particle(part_mass, part_radius, dt, prev_poss[i*8+j], poss[i*8+j],
-                          vels[i*8+j], accs[i*8+j]);
+                          vels[i*8+j], accs[i*8+j], i);
       }
    }
 }
 
 void initSim() {
-   initRigid(0, 0, 0.4);
-   for (int i = 0; i < FLR.rl[0]->pl.size(); i++) {
-      FLR.rl[0]->pl[i]->init();
-      Eigen::Vector3d tmp (0.1, 0.2, 0);
-      FLR.rl[0]->omega = tmp;
-      // FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
+   initRigids();
+   for (int i = 0; i < FLR.rl.size(); i++) {
+      for (int j = 0; j < FLR.rl[i]->pl.size(); j++) {
+         FLR.rl[i]->pl[j]->init();
+         // Eigen::Vector3d tmp (0.1, 0.2, 0);
+         // FLR.rl[i]->omega = tmp;
+         // // FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
+      }
+      FLR.rl[i]->init();
    }
-   FLR.rl[0]->init();
    // for floor
    floor_elass[0] = 1;
    floor_orgs[0][0] = floor_orgs[0][1] = floor_orgs[0][2] = 0;
@@ -215,11 +221,11 @@ void display() {
    gluLookAt(0.0, 0.0, distance, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
    glRotatef( -pitch, 1.0, 0.0, 0.0 );
    glRotatef( -yaw, 0.0, 1.0, 0.0 );
+   physics_calculate();
    // draw_floor();
    draw_origin();
    draw_rigids();
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
-   physics_calculate();
 }
 
 /* Call back when the windows is re-sized */

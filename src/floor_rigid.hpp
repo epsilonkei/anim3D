@@ -51,7 +51,7 @@ public:
     floor_collision_penalty_all();
     for (int i=0; i<this->rl.size(); i++) {
       rl[i]->update_rigid_movement(dt);
-      rl[i]->update_particles_movement();
+      rl[i]->update_particles_movement(dt);
     }
   }
 };

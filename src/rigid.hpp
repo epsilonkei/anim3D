@@ -79,7 +79,7 @@ public:
       Eigen::Matrix3d dR = Eigen::AngleAxisd(dt*rot, this->omega/rot).toRotationMatrix();
       this->rotation = dR * this->rotation;
     }
-    infinite_sigmal_matrix(this->omega, &this->omegax);
+    // infinite_sigmal_matrix(this->omega, &this->omegax);
     // this->rotation += this->omegax * this->rotation * dt;
   }
 
@@ -89,14 +89,16 @@ public:
     (*ret)(2,0) = -v(1); (*ret)(2,1) = v(0); (*ret)(2,2) = 0;
   }
 
-  void update_particles_movement() {
+  void update_particles_movement(double dt) {
     for (int i=0; i<this->pl.size(); i++) {
       // r_i = R * r0_i + x
+      this->pl[i]->prev_pos = this->pl[i]->pos;
       this->pl[i]->pos = this->rotation * this->pl[i]->pos_to_cent + this->com;
       // rdot_i = omega x R * r0_i + v = omega x (r_i - x) + v
       // this->pl[i]->vel = this->omegax * this->rotation * this->pl[i]->pos_to_cent + this->vel;
-      this->pl[i]->vel = this->omegax * (this->pl[i]->pos - this->com) + this->vel;
+      // this->pl[i]->vel = this->omegax * (this->pl[i]->pos - this->com) + this->vel;
+      this->pl[i]->vel = (this->pl[i]->pos - this->pl[i]->prev_pos) / dt;
+      this->pl[i]->last_dt = dt;
     }
-    // std::cerr << this->pl[0]->pos_to_cent.transpose() << std::endl;
   }
 };

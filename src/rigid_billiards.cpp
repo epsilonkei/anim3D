@@ -18,17 +18,17 @@ int windowPosY   = 50;      // Windowed mode's top-left corner y
 int refreshMillis = 30;      // Refresh period in milliseconds
 double dt = refreshMillis * 1e-3;
 // double dt = 1e-3;
-bool applyGravity = true;
 
 #define table_length 5
+#define rigid_size 0.4
 
 #define N_part_per_rigid 8
-#define N_rigid 3
+#define N_rigid 10
 double part_mass = 1, part_radius = 0.1, rigid_height = 0.1;
 double prev_poss[N_part_per_rigid * N_rigid][3], poss[N_part_per_rigid * N_rigid][3],
    vels[N_part_per_rigid * N_rigid][3], accs[N_part_per_rigid * N_rigid][3];
 
-#define N_floor 1
+#define N_floor 5
 double floor_elass[N_floor];
 double floor_orgs[N_floor][3], floor_norms[N_floor][3];
 
@@ -81,7 +81,7 @@ void initGL() {
 void initRigids() {
    // for rigids
    srand(0);
-   double com_x, com_y, rgl = 0.4;
+   double com_x, com_y, rgl = rigid_size;
    for (int i = 0; i < N_rigid; i++) {
       com_x = double(rand()) / RAND_MAX * 2 * table_length - table_length;
       com_y = double(rand()) / RAND_MAX * 2 * table_length - table_length;
@@ -127,9 +127,10 @@ void initSim() {
    for (int i = 0; i < FLR.rl.size(); i++) {
       for (int j = 0; j < FLR.rl[i]->pl.size(); j++) {
          FLR.rl[i]->pl[j]->init();
-         // // FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
+         // FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
       }
-      Eigen::Vector3d tmp_omega (0.1, 0.2, 0.1), tmp_vel(0.1, 0.2, 0);
+      Eigen::Vector3d tmp_omega (0.2, 0.1, 0.1), tmp_vel(2, 0.5, 0);
+      FLR.rl[i]->length = rigid_size;
       FLR.rl[i]->omega = tmp_omega;
       FLR.rl[i]->vel = tmp_vel;
       FLR.rl[i]->init();
@@ -139,6 +140,27 @@ void initSim() {
    floor_orgs[0][0] = floor_orgs[0][1] = floor_orgs[0][2] = 0;
    floor_norms[0][0] = floor_norms[0][1] = 0; floor_norms[0][2] = 1;
    FLR.add_floor(floor_orgs[0], floor_norms[0], floor_elass[0]);
+   // for side wall
+   floor_elass[1] = 1;
+   floor_orgs[1][0] = -table_length;floor_orgs[1][1] = 0;floor_orgs[1][2] = 0;
+   floor_norms[1][0] = 1;floor_norms[1][1] = 0; floor_norms[1][2] = 0;
+   FLR.add_floor(floor_orgs[1], floor_norms[1], floor_elass[1]);
+   //
+   floor_elass[2] = 1;
+   floor_orgs[2][0] = table_length;floor_orgs[2][1] = 0;floor_orgs[2][2] = 0;
+   floor_norms[2][0] = -1;floor_norms[2][1] = 0; floor_norms[2][2] = 0;
+   FLR.add_floor(floor_orgs[2], floor_norms[2], floor_elass[2]);
+   //
+   floor_elass[3] = 1;
+   floor_orgs[3][0] = 0;floor_orgs[3][1] = -table_length;floor_orgs[3][2] = 0;
+   floor_norms[3][0] = 0;floor_norms[3][1] = 1; floor_norms[3][2] = 0;
+   FLR.add_floor(floor_orgs[3], floor_norms[3], floor_elass[3]);
+   //
+   floor_elass[4] = 1;
+   floor_orgs[4][0] = 0;floor_orgs[4][1] = table_length;floor_orgs[4][2] = 0;
+   floor_norms[4][0] = 0;floor_norms[4][1] = -1; floor_norms[4][2] = 0;
+   FLR.add_floor(floor_orgs[4], floor_norms[4], floor_elass[4]);
+   std::cerr << FLR.floors.size() << std::endl;
 }
 
 void physics_calculate(){

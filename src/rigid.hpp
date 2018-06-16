@@ -2,6 +2,8 @@
 #include "particle.hpp"
 #include <vector>
 #include <Eigen/Dense>
+#include <algorithm>
+#include <iterator>
 
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
@@ -20,6 +22,10 @@ public:
   Eigen::Vector3d lin_moment, ang_moment;
   //
   double max_radius;
+  //
+  std::vector<Eigen::Vector3d> bounding_plane_cent;
+  std::vector<Eigen::Vector3d> bounding_plane_out_normv;
+  std::vector<Eigen::Vector3d> bounding_plane_cent_local;
 
   rigid_body()
     : vel(Eigen::Vector3d::Zero()), omega(Eigen::Vector3d::Zero()), max_radius(0)
@@ -57,7 +63,18 @@ public:
     this->rotation = Eigen::Matrix3d::Identity();
     // this->ang_moment = this->rotation * this->I_body * this->rotation.transpose() * this->omega;
     this->ang_moment = this->I_body * this->omega;
-    this->lin_moment += this->mass * this->vel;
+    this->lin_moment = this->mass * this->vel;
+    // Init bounding plane center in local coord (only worked for cube and convex polygon in advance)
+    this->bounding_plane_cent_local.push_back(this->pl[0]->pos_to_cent + this->pl[2]->pos_to_cent);
+    this->bounding_plane_cent_local.push_back(this->pl[2]->pos_to_cent + this->pl[5]->pos_to_cent);
+    this->bounding_plane_cent_local.push_back(this->pl[5]->pos_to_cent + this->pl[7]->pos_to_cent);
+    this->bounding_plane_cent_local.push_back(this->pl[7]->pos_to_cent + this->pl[0]->pos_to_cent);
+    this->bounding_plane_cent_local.push_back(this->pl[2]->pos_to_cent + this->pl[7]->pos_to_cent);
+    this->bounding_plane_cent_local.push_back(this->pl[0]->pos_to_cent + this->pl[5]->pos_to_cent);
+    copy(this->bounding_plane_cent_local.begin(), this->bounding_plane_cent_local.end(),
+         std::back_inserter(this->bounding_plane_out_normv));
+    copy(this->bounding_plane_cent_local.begin(), this->bounding_plane_cent_local.end(),
+         std::back_inserter(this->bounding_plane_cent));
   }
 
   void update_rigid_movement(double dt) {

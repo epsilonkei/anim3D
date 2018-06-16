@@ -23,7 +23,7 @@ double dt = refreshMillis * 1e-3;
 #define rigid_size 0.4
 
 #define N_part_per_rigid 8
-#define N_rigid 10
+#define N_rigid 15
 double part_mass = 1, part_radius = 0.1, rigid_height = 0.1;
 double prev_poss[N_part_per_rigid * N_rigid][3], poss[N_part_per_rigid * N_rigid][3],
    vels[N_part_per_rigid * N_rigid][3], accs[N_part_per_rigid * N_rigid][3];
@@ -160,7 +160,6 @@ void initSim() {
    floor_orgs[4][0] = 0;floor_orgs[4][1] = table_length;floor_orgs[4][2] = 0;
    floor_norms[4][0] = 0;floor_norms[4][1] = -1; floor_norms[4][2] = 0;
    FLR.add_floor(floor_orgs[4], floor_norms[4], floor_elass[4]);
-   std::cerr << FLR.floors.size() << std::endl;
 }
 
 void physics_calculate(){

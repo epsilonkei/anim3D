@@ -4,8 +4,10 @@
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
-#define DGAIN 5e3
-#define VGAIN 1e3
+#define WALL_DGAIN 3e3
+#define WALL_VGAIN 5e1
+#define RIGID_DGAIN 3e3
+#define RIGID_VGAIN 5e1
 
 class floor_rigids {
 public:
@@ -32,9 +34,8 @@ public:
         - part->radius;
       part->force = -part->mass * grav * e3;
       if (dist_to_floor < 0) {
-        part->force += (- DGAIN*dist_to_floor - VGAIN*
-                        part->vel.dot(-dist_to_floor*this->floors[k]->norm_vec))
-          * (-dist_to_floor*this->floors[k]->norm_vec);
+        part->force += (- WALL_DGAIN*dist_to_floor - WALL_VGAIN*
+                        part->vel.dot(this->floors[k]->norm_vec)) * this->floors[k]->norm_vec;
       }
     }
   }

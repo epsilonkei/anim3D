@@ -102,10 +102,10 @@ void initSim() {
    }
    for (int i = 0; i < FLR.rl[0]->pl.size(); i++) {
       FLR.rl[0]->pl[i]->init();
-      Eigen::Vector3d tmp (0.1, 0.2, 0);
-      FLR.rl[0]->omega = tmp;
       FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
    }
+   Eigen::Vector3d tmp (0.1, 0.2, 0);
+   FLR.rl[0]->omega = tmp;
    FLR.rl[0]->init();
    // for floor
    floor_elass[0] = 1;

@@ -8,9 +8,9 @@
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
-#define POOL_MAX_X 2.0
-#define POOL_MAX_Y 2.0
-
+#define POOL_MAX_X 3.0
+#define POOL_MAX_Y 3.0
+#define DEFAULT_HEIGHT 2.0
 // Global variables
 char title[] = "Full-Screen & Windowed Mode";  // Windowed mode's title
 int windowWidth  = 640;     // Windowed mode's width
@@ -19,7 +19,7 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = 1e-2;
+double dt = 5 * 1e-3;
 //double dt = refreshMillis * 1e-3;
 double dx = 0.05, dy = 0.05;
 
@@ -64,9 +64,10 @@ void initGL() {
 
 void initSim() {
    WV.init(POOL_MAX_X, POOL_MAX_Y, dt, dx, dy);
-   // WV.set_const_height(2, 0, 0, WV.max_i, WV.max_j);
-   WV.set_random_height(2);
-   // std::cerr << WV.max_i << ", " << WV.max_j << std::endl;
+   WV.set_const_height(DEFAULT_HEIGHT, 0, 0, WV.max_i, WV.max_j);
+   WV.set_exp_height(1, WV.max_i, WV.max_j);
+   // WV.set_const_height(1.6, 1, 1, WV.max_i/10, WV.max_j/10);
+   // WV.set_random_height(2);
 }
 
 void physics_calculate(){
@@ -100,10 +101,11 @@ void draw_origin(){
 void draw_wave() {
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, blue);
    //
-   for (int i=0; i<WV.max_i; i++) {
-      for (int j=0; j<WV.max_j; j++) {
+   for (int i=0; i<WV.max_i - 2; i++) {
+      for (int j=0; j<WV.max_j - 2; j++) {
          glPushMatrix();
-         glTranslatef (i*WV.dx - 0.5*POOL_MAX_X, j*WV.dy - 0.5*POOL_MAX_Y, WV.abs_h(i,j));
+         glTranslatef (i*WV.dx - 0.5*POOL_MAX_X, j*WV.dy - 0.5*POOL_MAX_Y,
+                       WV.abs_h(i,j) - DEFAULT_HEIGHT);
          // glScalef (WV.dx, WV.dy, 0.5*WV.abs_h(i,j));
          glutSolidCube(WV.dx);
          glPopMatrix();

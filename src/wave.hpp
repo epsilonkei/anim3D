@@ -1,6 +1,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <ctime>
+#include <cmath>
 
 double grav = 9.8;
 
@@ -52,6 +53,18 @@ public:
     for ( int i=1; i<this->max_i-1; i++ ) {
       for ( int j=1; j<this->max_j-1; j++ ) {
         this->h(i,j) += (_h * ((2.0 * std::rand())/RAND_MAX - 1));
+      }
+    }
+    this->abs_h = this->h + this->gr;
+  }
+
+  void set_exp_height(double _max_h, int _max_i, int _max_j) {
+    double cent_x = this->max_x * 0.5, cent_y = this->max_y * 0.5;
+    for ( int i=0; i<_max_i; i++ ) {
+      if ( i>=this->max_i ) break;
+      for ( int j=0; j<_max_j; j++ ) {
+        if ( j>=this->max_j ) break;
+        this->h(i,j) += _max_h * exp(- pow((i-cent_x)/2, 2) - pow((j-cent_y)/2, 2));
       }
     }
     this->abs_h = this->h + this->gr;
@@ -125,6 +138,14 @@ public:
       this->abs_h(i,this->max_j-1) = this->abs_h(i,this->max_j-2);
       this->vx(i,this->max_j-1) = this->vy(i,this->max_j-1) = this->vy(i,this->max_j-2) = 0;
     }
+    //
+    this->abs_h(0,0) = (this->abs_h(0,1) + this->abs_h(1,0))/2;
+    this->abs_h(0,this->max_j-1) = (this->abs_h(0,this->max_j-2)
+                                    + this->abs_h(1,this->max_j-1))/2;
+    this->abs_h(this->max_i-1,0) = (this->abs_h(this->max_i-1,1)
+                                    + this->abs_h(this->max_i-2,0))/2;
+    this->abs_h(this->max_i-1,this->max_j-1) = (this->abs_h(this->max_i-1,this->max_j-2)
+                                                + this->abs_h(this->max_i-2,this->max_j-1))/2;
   }
 
   void update() {

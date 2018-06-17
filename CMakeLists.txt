@@ -26,3 +26,8 @@ target_link_libraries(rigid_billiards ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 set (TASK3_SOURCES src/deformable_solid_collision.cpp)
 add_executable(deformable_solid_collision ${TASK3_SOURCES})
 target_link_libraries(deformable_solid_collision ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+
+## Compile for task 4
+set (TASK3_SOURCES src/wave_demo.cpp)
+add_executable(wave_demo ${TASK3_SOURCES})
+target_link_libraries(wave_demo ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

@@ -37,6 +37,27 @@ public:
     this->vy_buf = Eigen::MatrixXd(this->max_i, this->max_j);
   }
 
+  void calc_volume() {
+    this->volume = 0;
+    for ( int i=0; i<this->max_i; i++ ) {
+      for ( int j=0; j<this->max_j; j++ ) {
+        this->volume += this->h(i,j);
+      }
+    }
+  }
+
+  void fix_volume_conservation() {
+    double vol = this->volume;
+    calc_volume();
+    double add = (volume - this->volume)/(this->max_i*this->max_j);
+    for ( int i=0; i<this->max_i; i++ ) {
+      for ( int j=0; j<this->max_j; j++ ) {
+        this->h(i,j) += add;
+      }
+    }
+    this->volume = volume;
+  }
+
   void set_const_height(double h, int i0, int j0, int di, int dj) {
     for ( int i=i0; i<di+i0; i++ ) {
       if ( i>=this->max_i ) break;
@@ -46,6 +67,7 @@ public:
       }
     }
     this->abs_h = this->h + this->gr;
+    calc_volume();
   }
 
   void set_random_height(double _h, bool seed=false) {
@@ -56,6 +78,7 @@ public:
       }
     }
     this->abs_h = this->h + this->gr;
+    calc_volume();
   }
 
   void set_exp_height(double _max_h, int _max_i, int _max_j) {
@@ -68,6 +91,7 @@ public:
       }
     }
     this->abs_h = this->h + this->gr;
+    calc_volume();
   }
 
   double get_value_with_bound_check(int i, int j, Eigen::MatrixXd &map) {
@@ -163,5 +187,6 @@ public:
     update_velocity();
     // boundaries condition
     constrained_with_reflecting_boundary();
+    fix_volume_conservation();
   }
 };

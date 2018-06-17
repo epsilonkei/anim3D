@@ -160,7 +160,8 @@ void display() {
       glTranslatef(FLR.rl[0]->pl[i]->pos[0], FLR.rl[0]->pl[i]->pos[1], FLR.rl[0]->pl[i]->pos[2]);
       glutSolidSphere (FLR.rl[0]->pl[i]->radius, 16, 16);
       glPopMatrix();
-   }   glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
+   }
+   glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
    physics_calculate();
 }
 

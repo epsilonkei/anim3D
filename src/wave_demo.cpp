@@ -25,7 +25,7 @@ double dx = 0.05, dy = 0.05;
 
 wave WV;
 
-static double org_dist = 5.0, org_pitch = 20.0, org_yaw = 0.0;
+static double org_dist = 4.0, org_pitch = 60.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;

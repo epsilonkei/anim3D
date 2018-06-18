@@ -16,8 +16,9 @@ class deformable_solid {
 public:
   std::vector<boost::shared_ptr<particle> > pl;
   std::vector<std::vector<int> > next_part;
-  double length;
-  Eigen::Vector3d tmp_d;
+  double mass, length;
+  Eigen::Matrix3d rotation;
+  Eigen::Vector3d com, tmp_d;
 
   deformable_solid() {}
   ~ deformable_solid() {}
@@ -42,6 +43,27 @@ public:
       else if (i==7) { npl[0] = 3; npl[1] = 4; npl[2] = 6; }
       this->next_part.push_back(npl);
     }
+    // Calculate center and mass
+    this->com = Eigen::Vector3d::Zero();
+    this->mass = 0;
+    for (int i=0; i<this->pl.size(); i++) {
+      this->com += this->pl[i]->mass * this->pl[i]->pos;
+      this->mass += this->pl[i]->mass;
+    }
+    this->com /= this->mass;
+    for (int i=0; i<this->pl.size(); i++) {
+      // Update particles relative pos to center
+      this->pl[i]->pos_to_cent = this->pl[i]->pos - this->com;
+    }
+  }
+
+  void rotate(Eigen::Vector3d rot) {
+    double rotn = rot.norm();
+    Eigen::Matrix3d dR = Eigen::AngleAxisd(rotn, rot/rotn).toRotationMatrix();
+    this->rotation = dR * Eigen::Matrix3d::Identity();
+    for (int i=0; i<this->pl.size(); i++) {
+      this->pl[i]->pos = this->rotation * this->pl[i]->pos_to_cent + this->com;
+    }
   }
 
   void update_spring_damper() {
@@ -55,8 +77,8 @@ public:
         if (dist > SPRING_DAMPER_THRE) {
           this->tmp_d /= dist;
           this->pl[i]->force += K_SPRING * (dist - this->length) * this->tmp_d;
-          this->pl[i]->force += K_DAMPER * (this->pl[nid]->vel.dot(this->tmp_d)
-                                            - this->pl[i]->vel.dot(this->tmp_d)) * this->tmp_d;
+          this->pl[i]->force += K_DAMPER * (this->pl[nid]->vel - this->pl[i]->vel).dot(this->tmp_d)
+            * this->tmp_d;
         }
       }
     }

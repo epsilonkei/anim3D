@@ -79,7 +79,7 @@ public:
 
   void update_rigid_movement(double dt) {
     // Calculation moment of inertia
-    this->I_inv = rotation * this->I_body_inv * rotation.transpose();
+    this->I_inv = this->rotation * this->I_body_inv * this->rotation.transpose();
     // Calculation force and torque
     this->force = Eigen::Vector3d::Zero();
     this->torque = Eigen::Vector3d::Zero();

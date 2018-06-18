@@ -37,7 +37,6 @@ public:
       }
       this->const_length.push_back(cl);
     }
-    std::cerr << this->const_length.size() << std::endl;
     // Calculate center and mass
     this->com = Eigen::Vector3d::Zero();
     this->mass = 0;

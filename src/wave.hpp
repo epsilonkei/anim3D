@@ -111,10 +111,10 @@ public:
     double w01 = (1 - (i-i0)) * (1 - (j1-j));
     double w11 = (1 - (i1-i)) * (1 - (j1-j));
     double w10 = (1 - (i1-i)) * (1 - (j-j0));
-    double ret = this->get_value_with_bound_check(i0,j0,*s) * w00
-      + this->get_value_with_bound_check(i0,j1,*s) * w01
-      + this->get_value_with_bound_check(i1,j1,*s) * w11
-      + this->get_value_with_bound_check(i1,j0,*s) * w10;
+    double ret = get_value_with_bound_check(i0,j0,*s) * w00
+      + get_value_with_bound_check(i0,j1,*s) * w01
+      + get_value_with_bound_check(i1,j1,*s) * w11
+      + get_value_with_bound_check(i1,j0,*s) * w10;
     return ret;
   }
 
@@ -123,7 +123,7 @@ public:
       for ( int j=0; j<this->max_j; j++ ) {
         double x_vxij = i*this->dx - this->dt * (*v1)(i,j);
         double y_vyij = j*this->dy - this->dt * (*v2)(i,j);
-        (*ret)(i,j) = this->bilinear_interpolate(x_vxij, y_vyij, s);
+        (*ret)(i,j) = bilinear_interpolate(x_vxij, y_vyij, s);
       }
     }
   }

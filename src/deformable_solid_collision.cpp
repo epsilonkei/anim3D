@@ -32,7 +32,7 @@ double floor_orgs[N_floor][3], floor_norms[N_floor][3];
 
 floor_rigids FLR;
 
-static double org_dist = 10.0, org_pitch = 80.0, org_yaw = 0.0;
+static double org_dist = 8.0, org_pitch = 80.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;

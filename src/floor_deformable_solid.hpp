@@ -4,8 +4,8 @@
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
-#define WALL_DGAIN 3e3
-#define WALL_VGAIN 5e1
+#define WALL_DGAIN 3e4
+#define WALL_VGAIN 5e2
 
 class floor_rigids {
 public:

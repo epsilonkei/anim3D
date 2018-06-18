@@ -119,8 +119,8 @@ public:
   }
 
   void advect(Eigen::MatrixXd *ret, Eigen::MatrixXd *s, Eigen::MatrixXd *v1, Eigen::MatrixXd *v2) {
-    for ( int i=0; i<this->max_i; i++ ) {
-      for ( int j=0; j<this->max_j; j++ ) {
+    for ( int i=0; i<this->max_i-1; i++ ) {
+      for ( int j=0; j<this->max_j-1; j++ ) {
         double x_vxij = i*this->dx - this->dt * (*v1)(i,j);
         double y_vyij = j*this->dy - this->dt * (*v2)(i,j);
         (*ret)(i,j) = bilinear_interpolate(x_vxij, y_vyij, s);
@@ -139,8 +139,12 @@ public:
 
   void update_velocity() {
     for ( int i=1; i<this->max_i; i++ ) {
-      for ( int j=1; j<this->max_j; j++ ) {
+      for ( int j=0; j<this->max_j; j++ ) {
         this->vx(i,j) += grav * (this->abs_h(i-1,j) - this->abs_h(i,j)) / this->dx * this->dt;
+      }
+    }
+    for ( int i=0; i<this->max_i; i++ ) {
+      for ( int j=1; j<this->max_j; j++ ) {
         this->vy(i,j) += grav * (this->abs_h(i,j-1) - this->abs_h(i,j)) / this->dy * this->dt;
       }
     }

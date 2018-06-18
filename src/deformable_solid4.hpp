@@ -11,7 +11,6 @@ extern Eigen::Vector3d e1, e2, e3;
 #define K_SPRING 1e3
 #define K_DAMPER 1e2
 #define SPRING_DAMPER_THRE 1e-3
-#define DEFORM_RATIO 5e-1
 
 class deformable_solid {
 public:
@@ -108,20 +107,33 @@ public:
     }
     this->com /= this->mass;
     this->I_body = Eigen::Matrix3d::Zero();
+    Eigen::Vector3d ptc_rot_inv;
     for (int i=0; i<this->pl.size(); i++) {
       // Update particles relative pos to center
       this->pl[i]->pos_to_cent = this->pl[i]->pos - this->com;
       if (this->pl[i]->pos_to_cent.norm() > this->max_radius)
         this->max_radius = this->pl[i]->pos_to_cent.norm();
       // Calculate I_body
-      this->I_body +=  this->pl[i]->mass * (this->pl[i]->pos_to_cent.squaredNorm() * Eigen::Matrix3d::Identity() - this->pl[i]->pos_to_cent * this->pl[i]->pos_to_cent.transpose());
+      ptc_rot_inv = this->rotation.transpose() * this->pl[i]->pos_to_cent;
+      this->I_body +=  this->pl[i]->mass * (ptc_rot_inv.squaredNorm() * Eigen::Matrix3d::Identity() - ptc_rot_inv * ptc_rot_inv.transpose());
     }
     this->I_body_inv = this->I_body.inverse();
   }
 
+  void rotate(Eigen::Vector3d rot, double dt) {
+    double rotn = rot.norm();
+    Eigen::Matrix3d dR = Eigen::AngleAxisd(rotn, rot/rotn).toRotationMatrix();
+    this->rotation = dR * this->rotation;
+    for (int i=0; i<this->pl.size(); i++) {
+      this->pl[i]->pos = this->rotation * this->pl[i]->pos_to_cent + this->com;
+      this->pl[i]->prev_pos = this->pl[i]->pos - this->pl[i]->vel * dt;
+    }
+    init();
+  }
+
   void update_rigid_movement(double dt) {
     // Calculation moment of inertia
-    this->I_inv = rotation * this->I_body_inv * rotation.transpose();
+    this->I_inv = this->rotation * this->I_body_inv * this->rotation.transpose();
     // Calculation force and torque
     this->force = Eigen::Vector3d::Zero();
     this->torque = Eigen::Vector3d::Zero();

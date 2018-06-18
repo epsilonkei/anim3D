@@ -5,7 +5,7 @@ class particle {
 public:
   Eigen::Vector3d prev_pos, pos, pos_to_cent, vel, acc;
   double mass, radius;
-  Eigen::Vector3d force;
+  Eigen::Vector3d force, deform_force;
   // buf
   double last_dt, time;
 
@@ -17,7 +17,8 @@ public:
       acc(Eigen::Map<Eigen::Vector3d>(_acc,3)),
       pos_to_cent(Eigen::Vector3d::Zero()),
       mass(_mass), radius(_radius), last_dt(_last_dt), time(0),
-      force(Eigen::Vector3d::Zero())
+      force(Eigen::Vector3d::Zero()),
+      deform_force(Eigen::Vector3d::Zero())
   {}
   ~ particle() {
     // std::cout << "destroy particle" << std::endl;

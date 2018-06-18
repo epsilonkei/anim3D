@@ -2,7 +2,7 @@
 #include <cmath>
 #include <Eigen/Dense>
 #include <iostream>
-#include "floor_deformable_solid.hpp"
+#include "floor_deformable_solid4.hpp"
 #define PI 3.14159265
 
 extern double grav;
@@ -16,7 +16,7 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = refreshMillis * 1e-3;
+double dt = refreshMillis * 1e-4;
 // double dt = 1e-3;
 bool applyGravity = true;
 
@@ -104,6 +104,8 @@ void initSim() {
       FLR.rl[0]->pl[i]->init();
       FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
    }
+   // Eigen::Vector3d tmp (0.1, 0.2, 0);
+   // FLR.rl[0]->omega = tmp;
    FLR.rl[0]->init();
    // for floor
    floor_elass[0] = 1;

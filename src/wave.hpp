@@ -83,11 +83,13 @@ public:
 
   void set_exp_height(double _max_h, int _max_i, int _max_j) {
     double cent_x = this->max_x * 0.5, cent_y = this->max_y * 0.5;
-    for ( int i=0; i<_max_i; i++ ) {
-      if ( i>=this->max_i ) break;
+    int cent_i = this->max_i / 2, cent_j = this->max_j / 2;
+    for ( int i=-max_i/2 ; i<_max_i/2; i++ ) {
+      if ( i+cent_i>=this->max_i || i+cent_i < 0) break;
       for ( int j=0; j<_max_j; j++ ) {
-        if ( j>=this->max_j ) break;
-        this->h(i,j) += _max_h * exp(- pow((i-cent_x)/2, 2) - pow((j-cent_y)/2, 2));
+        if ( j+cent_j>=this->max_j || j+cent_j <0 ) break;
+        this->h(i + cent_i,j + cent_j) += _max_h * exp(- pow(i*this->dx, 2)
+                                                       - pow(j*this->dy, 2));
       }
     }
     this->abs_h = this->h + this->gr;

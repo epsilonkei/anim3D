@@ -2,7 +2,7 @@
 #include <cmath>
 #include <Eigen/Dense>
 #include <iostream>
-#include "floor_deformable_solid4.hpp"
+#include "floor_deformable_solid.hpp"
 #define PI 3.14159265
 
 extern double grav;
@@ -107,6 +107,8 @@ void initSim() {
    // Eigen::Vector3d tmp (0.1, 0.2, 0);
    // FLR.rl[0]->omega = tmp;
    FLR.rl[0]->init();
+   Eigen::Vector3d tmp (0.1, 0.2, 0);
+   FLR.rl[0]->rotate(tmp, dt);
    // for floor
    floor_elass[0] = 1;
    floor_orgs[0][0] = floor_orgs[0][1] = floor_orgs[0][2] = 0;

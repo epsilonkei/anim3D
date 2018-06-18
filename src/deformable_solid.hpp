@@ -8,8 +8,8 @@
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
-#define K_SPRING 1e2
-#define K_DAMPER 1e1
+#define K_SPRING 2e3
+#define K_DAMPER 2e2
 #define SPRING_DAMPER_THRE 1e-3
 
 class deformable_solid {
@@ -57,12 +57,13 @@ public:
     }
   }
 
-  void rotate(Eigen::Vector3d rot) {
+  void rotate(Eigen::Vector3d rot, double dt) {
     double rotn = rot.norm();
     Eigen::Matrix3d dR = Eigen::AngleAxisd(rotn, rot/rotn).toRotationMatrix();
     this->rotation = dR * Eigen::Matrix3d::Identity();
     for (int i=0; i<this->pl.size(); i++) {
       this->pl[i]->pos = this->rotation * this->pl[i]->pos_to_cent + this->com;
+      this->pl[i]->prev_pos = this->pl[i]->pos - this->pl[i]->vel * dt;
     }
   }
 

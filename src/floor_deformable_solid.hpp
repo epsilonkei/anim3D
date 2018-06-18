@@ -1,4 +1,4 @@
-#include "deformable_solid.hpp"
+#include "deformable_solid2.hpp"
 #include "floor.hpp"
 
 extern double grav;
@@ -52,6 +52,9 @@ public:
     // Notes: initial force was apply in floor collision penalty function
     floor_collision_penalty_all(true);
     for (int i=0; i<this->rl.size(); i++) {
+      for (int j=0; j<this->rl[i]->pl.size(); j++) {
+        this->rl[i]->pl[j]->updateVerlet(dt);
+      }
       this->rl[i]->update_spring_damper();
       for (int j=0; j<this->rl[i]->pl.size(); j++) {
         this->rl[i]->pl[j]->updateVerlet(dt);

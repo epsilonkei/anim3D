@@ -8,8 +8,8 @@
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
-#define K_SPRING 2e3
-#define K_DAMPER 2e2
+#define K_SPRING 5e2
+#define K_DAMPER 5e1
 #define SPRING_DAMPER_THRE 1e-3
 
 class deformable_solid {

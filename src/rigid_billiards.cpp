@@ -16,7 +16,7 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = refreshMillis * 1e-3;
+double dt = refreshMillis * 1e-4;
 // double dt = 1e-3;
 
 #define table_length 5

@@ -65,7 +65,8 @@ void initGL() {
 void initSim() {
    WV.init(POOL_MAX_X, POOL_MAX_Y, dt, dx, dy);
    WV.set_const_height(DEFAULT_HEIGHT, 0, 0, WV.max_i, WV.max_j);
-   WV.set_exp_height(1, WV.max_i*0.1, WV.max_j*0.1);
+   WV.set_const_height(DEFAULT_HEIGHT + 1, 0, 0, WV.max_i/4, WV.max_j/4);
+   // WV.set_exp_height(1, WV.max_i*0.1, WV.max_j*0.1);
    // WV.set_const_height(1.6, 1, 1, WV.max_i/10, WV.max_j/10);
    // WV.set_random_height(2);
 }

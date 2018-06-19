@@ -16,13 +16,13 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = refreshMillis * 1e-3;
+double dt = refreshMillis * 1e-4;
 // double dt = 1e-3;
 bool applyGravity = true;
 
 #define N_part_per_rigid 8
 #define N_rigid 1
-double part_mass = 1, part_radius = 0.1, rigid_height = 2;
+double part_mass = 1, part_radius = 0.1, rigid_height = 5;
 double prev_poss[N_part_per_rigid * N_rigid][3], poss[N_part_per_rigid * N_rigid][3],
    vels[N_part_per_rigid * N_rigid][3], accs[N_part_per_rigid * N_rigid][3];
 
@@ -32,7 +32,7 @@ double floor_orgs[N_floor][3], floor_norms[N_floor][3];
 
 floor_rigids FLR;
 
-static double org_dist = 10.0, org_pitch = 80.0, org_yaw = 0.0;
+static double org_dist = 11.0, org_pitch = 80.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;

@@ -12,22 +12,7 @@ find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(/usr/include/eigen3)
 
-## Compile for task 1
-set (TASK1_SOURCES src/floor_rigid_collision.cpp)
-add_executable(floor_rigid_collision ${TASK1_SOURCES})
-target_link_libraries(floor_rigid_collision ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
-
-## Compile for task 2
-set (TASK2_SOURCES src/rigid_billiards.cpp)
-add_executable(rigid_billiards ${TASK2_SOURCES})
-target_link_libraries(rigid_billiards ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
-
-## Compile for task 3
-set (TASK3_SOURCES src/deformable_solid_collision.cpp)
-add_executable(deformable_solid_collision ${TASK3_SOURCES})
-target_link_libraries(deformable_solid_collision ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
-
-## Compile for task 4
-set (TASK4_SOURCES src/wave_demo.cpp)
-add_executable(wave_demo ${TASK4_SOURCES})
-target_link_libraries(wave_demo ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+## Compile for demo 1
+set (DEMO1_SOURCES src/water_demo.cpp)
+add_executable(water_demo ${DEMO1_SOURCES})
+target_link_libraries(water_demo ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

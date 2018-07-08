@@ -4,9 +4,20 @@
 #include <iostream>
 #include "floors_fluid.hpp"
 
+#define GL_GLEXT_PROTOTYPES 1
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 extern double PI;
+
+static GLubyte *pixels = NULL;
+static const GLenum FORMAT = GL_RGBA;
+static const GLuint FORMAT_NBYTES = 4;
+static unsigned int nscreenshots = 0;
+static double timeInSim = 0.0;
 
 // Global variables
 char title[] = "Full-Screen & Windowed Mode";  // Windowed mode's title
@@ -16,8 +27,10 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-double dt = refreshMillis * 1e-4;
+double dt = refreshMillis * 1e-3;
 // double dt = 1e-3;
+int frameRate = 1000 / refreshMillis;
+#define MAX_TIME 20
 
 #define N_part_per_fluid 1000
 #define N_fluid 1
@@ -59,9 +72,16 @@ float color[][4] = {{0.9, 0.1, 0.1, 1.0}, // red
 
 /* Initialize OpenGL Graphics */
 void initGL() {
+   glReadBuffer(GL_BACK);
    // glClearColor (1.0, 1.0, 1.0, 1.0);
    glClearColor (0.0, 0.0, 0.0, 1.0);
    glClearDepth( 1.0 );
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   glViewport(0, 0, windowWidth, windowHeight);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   glMatrixMode(GL_MODELVIEW);
+   pixels = (GLubyte*)malloc(FORMAT_NBYTES * windowWidth * windowHeight);
 
    // Depth Test
    glEnable( GL_DEPTH_TEST );
@@ -75,6 +95,28 @@ void initGL() {
    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_ambient);
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
+}
+
+void deinit()  {
+    free(pixels);
+}
+
+static void create_ppm(char *prefix, int frame_id, unsigned int width, unsigned int height,
+        unsigned int color_max, unsigned int pixel_nbytes, GLubyte *pixels) {
+    size_t i, j, k, cur;
+    enum Constants { max_filename = 256 };
+    char filename[max_filename];
+    snprintf(filename, max_filename, "%s%d.ppm", prefix, frame_id);
+    FILE *f = fopen(filename, "w");
+    fprintf(f, "P3\n%d %d\n%d\n", width, windowHeight, 255);
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j++) {
+            cur = pixel_nbytes * ((height - i - 1) * width + j);
+            fprintf(f, "%3d %3d %3d ", pixels[cur], pixels[cur + 1], pixels[cur + 2]);
+        }
+        fprintf(f, "\n");
+    }
+    fclose(f);
 }
 
 void initFloor() {
@@ -165,6 +207,7 @@ void initSim() {
 
 void physics_calculate(){
    FF.update_movement(dt);
+   timeInSim += dt;
 }
 
 void draw_floor(){
@@ -276,6 +319,13 @@ void display() {
    display_timer.stop();
    std::cerr << "display_time: " << display_timer.getTime() << std::endl;
 #endif
+#if ENABLE_SCREEN_SHOT
+   glReadPixels(0, 0, windowWidth, windowHeight, FORMAT, GL_UNSIGNED_BYTE, pixels);
+   puts("screenshot");
+   create_ppm("/tmp/water/", nscreenshots, windowWidth, windowHeight, 255, FORMAT_NBYTES, pixels);
+   nscreenshots++;
+#endif //ENABLE_SCREEN_SHOT
+   if (timeInSim > MAX_TIME) exit(0);
 }
 
 /* Call back when the windows is re-sized */
@@ -393,6 +443,7 @@ int main(int argc, char** argv) {
    }
    initSim();
    initGL();
+   atexit(deinit);
    glutMainLoop();               // Enter event-processing loop
    return 0;
 }

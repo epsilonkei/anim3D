@@ -5,6 +5,7 @@
 #include <cmath>
 #include <vector>
 #include "particle.hpp"
+#include "spatial_grid.hpp"
 
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
@@ -21,102 +22,125 @@ double EPSILON = 1e-9;
 class fluid {
 public:
   std::vector<boost::shared_ptr<particle> > pl;
-  // std::vector<std::vector<int> > nb;
+  std::vector<int> part_grid_id;
+  std::vector<std::vector<particle*> > nb;
   double init_dens;
   double kern_size, poly6_coeff, spikey_coeff, visc_laplacian_coeff;
+  spatial_grid grid;
+  std::unordered_map<int, particle*> particlesByGridID;
+  bool isSPHParticleRemoved = false;
 
-  fluid() {}
+  fluid(double _kern_size, double _init_dens) {
+    kern_size = _kern_size;
+    grid = spatial_grid();
+    grid.init(_kern_size);
+    init_dens = _init_dens;
+  }
   ~fluid() {}
 
   void add_particle(double _mass, double _radius, double _last_dt, double* _prev_pos, double* _pos, double* _vel, double* _acc) {
-    this->pl.push_back(boost::shared_ptr<particle>(new particle(_mass, _radius, _last_dt, _prev_pos, _pos, _vel, _acc)));
+    particle *part = new particle(_mass, _radius, _last_dt, _prev_pos, _pos, _vel, _acc);
+    pl.push_back(boost::shared_ptr<particle>(part));
+    int _grid_id = grid.insertPoint(part->pos);
+    part_grid_id.push_back(_grid_id);
+    std::vector<particle*> tmp{part};
+    nb.push_back(tmp);
+    std::pair<int, particle*> pair(_grid_id, part);
+    particlesByGridID.insert(pair);
   }
 
-  void init(double _kern_size, double _init_dens) {
-    this->kern_size = _kern_size;
+  void init() {
     this->poly6_coeff = 315.0/(64 *PI * pow(this->kern_size, 9));
     this->spikey_coeff = -45.0/(PI * pow(this->kern_size, 6));
     this->visc_laplacian_coeff = 45.0/(PI * pow(this->kern_size, 6)); // ???
-    this->init_dens = _init_dens;
+  }
+
+  void update_grid() {
+    for (uint i=0; i<pl.size(); i++) {
+      grid.movePoint(part_grid_id[i], pl[i]->pos);
+    }
+    grid.update();
   }
 
   void find_neighbor() {
-
+    for (uint i=0; i<nb.size(); i++) {
+      nb[i].clear();
+      std::vector<int> refs = grid.getIDsInRadiusOfPoint(part_grid_id[i], kern_size);
+      for (uint j=0; j<refs.size(); j++) {
+        nb[i].push_back(particlesByGridID[refs[j]]);
+      }
+    }
   }
 
   void update_density_and_pressure() {
     for (uint i = 0; i < this->pl.size(); i++) {
-      uint j_nb;
       double dist_sq, diff, _dens = 0.0;
       // Use neighboring particles
-      // for (uint j=0; j < nb[i].size(); j++) {
-      //   j_nb = nb[i][j];
-      //   dist_sq = (pl[i]->pos - pl[j_nb]->pos).squaredNorm();
-      //   diff = this->kern_size * this->kern_size - dist_sq;
-      //   pl[i]->dens += pl[j_nb]->mass * this->poly6_coeff * diff * diff * diff;
-      // }
-      // Use all particles
-      for (uint j=0; j < this->pl.size(); j++) {
-        if (i == j) continue;
-        dist_sq = (this->pl[i]->pos - this->pl[j]->pos).squaredNorm();
+      for (uint j=0; j < nb[i].size(); j++) {
+        dist_sq = (pl[i]->pos - nb[i][j]->pos).squaredNorm();
         diff = this->kern_size * this->kern_size - dist_sq;
-        if (diff > 0)
-          _dens += this->pl[j]->mass * this->poly6_coeff * diff * diff * diff;
+        pl[i]->dens += nb[i][j]->mass * this->poly6_coeff * diff * diff * diff;
       }
+      // // Use all particles
+      // for (uint j=0; j < this->pl.size(); j++) {
+      //   if (i == j) continue;
+      //   dist_sq = (this->pl[i]->pos - this->pl[j]->pos).squaredNorm();
+      //   diff = this->kern_size * this->kern_size - dist_sq;
+      //   if (diff > 0)
+      //     _dens += this->pl[j]->mass * this->poly6_coeff * diff * diff * diff;
+      // }
       this->pl[i]->dens = std::max(_dens, this->init_dens);
       this->pl[i]->pres = K_PRESS*(this->pl[i]->dens - this->init_dens);
     }
   }
 
   void update_fluid_acc() {
-    uint j_nb;
     double dist, diff, spikey, massRatio, pterm, lap, mag;
     Eigen::Vector3d r, acc, vdiff, damp;
     for (uint i=0; i<this->pl.size(); i++) {
       acc = Eigen::Vector3d::Zero();
       // Use neighboring particles
-      // for (uint j=0; j < nb[pid].size(); j++) {
-      //   j_nb = nb[pid][j];
-      //   r = (pl[i]->pos - pl[j_nb]->pos);
-      //   dist = r.norm();
-      //   if (dist == 0.0) { continue; }
-      //   r = r/dist;
-      //   // acceleration due to pressure term
-      //   diff = this->kern_size - dist;
-      //   spikey = this->spikey_coeff*diff*diff;
-      //   massRatio = pl[j_nb]->mass/pl[i]->mass;
-      //   pterm = (pl[i]->pres + pl[j_nb]->pres) / (2*pl[i]->dens * pl[j_nb]->dens);
-      //   acc -= (massRatio*pterm*spikey)*r;
-      //   // acceleration due to viscosity term
-      //   if (!pl[j_nb]->isObstacle) {
-      //     lap = this->visc_laplacian_coeff * diff;
-      //     vdiff = pj->velocity - pi->velocity;
-      //     acc += (VISC_COEFF * massRatio * (1/pj->density) * lap) *vdiff;
-      //   }
-      // }
-      // Use all particles
-      for (uint j=0; j < this->pl.size(); j++) {
-        if (i == j) continue;
-        r = (this->pl[i]->pos - this->pl[j]->pos);
+      for (uint j=0; j < nb[i].size(); j++) {
+        r = (pl[i]->pos - nb[i][j]->pos);
         dist = r.norm();
-        if (dist == 0.0) continue;
+        if (dist == 0.0) { continue; }
         r = r/dist;
         // acceleration due to pressure term
         diff = this->kern_size - dist;
-        if (diff > 0) {
-          spikey = this->spikey_coeff*diff*diff;
-          massRatio = this->pl[j]->mass / this->pl[i]->mass;
-          pterm = (this->pl[i]->pres + this->pl[j]->pres) /
-            (2*this->pl[i]->dens * this->pl[j]->dens);
-          acc -= (massRatio*pterm*spikey)*r;
-          // acceleration due to viscosity term
-          // if (!pl[j]->isObstacle) {
-          //   lap = this->visc_laplacian_coeff * diff;
-          //   vdiff = pl[j]->vel - pl[i]->vel;
-          //   acc += (VISC_COEFF * massRatio * (1/pl[j]->dens) * lap) *vdiff;
-          // }
-        }
+        spikey = this->spikey_coeff*diff*diff;
+        massRatio = nb[i][j]->mass/pl[i]->mass;
+        pterm = (pl[i]->pres + nb[i][j]->pres) / (2*pl[i]->dens * nb[i][j]->dens);
+        acc -= (massRatio*pterm*spikey)*r;
+        // acceleration due to viscosity term
+        // if (!pl[j_nb]->isObstacle) {
+        lap = this->visc_laplacian_coeff * diff;
+        vdiff = nb[i][j]->vel - pl[i]->vel;
+        acc += (VISC_COEFF * massRatio * (1/nb[i][j]->dens) * lap) *vdiff;
+        // }
       }
+      // Use all particles
+      // for (uint j=0; j < this->pl.size(); j++) {
+      //   if (i == j) continue;
+      //   r = (this->pl[i]->pos - this->pl[j]->pos);
+      //   dist = r.norm();
+      //   if (dist == 0.0) continue;
+      //   r = r/dist;
+      //   // acceleration due to pressure term
+      //   diff = this->kern_size - dist;
+      //   if (diff > 0) {
+      //     spikey = this->spikey_coeff*diff*diff;
+      //     massRatio = this->pl[j]->mass / this->pl[i]->mass;
+      //     pterm = (this->pl[i]->pres + this->pl[j]->pres) /
+      //       (2*this->pl[i]->dens * this->pl[j]->dens);
+      //     acc -= (massRatio*pterm*spikey)*r;
+      //     // acceleration due to viscosity term
+      //     // if (!pl[j]->isObstacle) {
+      //     //   lap = this->visc_laplacian_coeff * diff;
+      //     //   vdiff = pl[j]->vel - pl[i]->vel;
+      //     //   acc += (VISC_COEFF * massRatio * (1/pl[j]->dens) * lap) *vdiff;
+      //     // }
+      //   }
+      // }
       // motion damping;
       mag = acc.norm();
       // if (motion_damping_enabled) {
@@ -136,7 +160,7 @@ public:
 
   double calc_sound_speed(int pid) {
     if (this->pl[pid]->dens < 1e-5) {
-        return 0.0;
+      return 0.0;
     }
     return sqrt(SPECIFIC_HEATS_RATIO * (this->pl[pid]->pres)/this->pl[pid]->dens);
   }
@@ -163,6 +187,7 @@ public:
   void update(double dt) {
     double time_left = dt, time_step;
     while (time_left > 0.0) {
+      update_grid();
       // Search neighboring particles
       find_neighbor();
       // Update density and pressure

@@ -19,9 +19,9 @@ int refreshMillis = 30;      // Refresh period in milliseconds
 // double dt = refreshMillis * 1e-4;
 double dt = 1e-3;
 
-#define N_part_per_fluid 100
+#define N_part_per_fluid 1000
 #define N_fluid 1
-double part_mass = 1e-3, part_radius = 0.1;
+double part_mass = 1e-3, part_radius = 0.05;
 double prev_poss[N_part_per_fluid * N_fluid][3], poss[N_part_per_fluid * N_fluid][3],
    vels[N_part_per_fluid * N_fluid][3], accs[N_part_per_fluid * N_fluid][3];
 
@@ -29,7 +29,7 @@ double prev_poss[N_part_per_fluid * N_fluid][3], poss[N_part_per_fluid * N_fluid
 double floor_elass[N_floor];
 double floor_orgs[N_floor][3], floor_norms[N_floor][3];
 
-#define cup_side 2.0
+#define cup_side 1.0
 #define h_cup 3.0
 floors_fluid FF;
 
@@ -119,11 +119,11 @@ void initFluid() {
          vels[i*8+j][0] = 0; vels[i*8+j][1] = 0; vels[i*8+j][2] = 0;
          accs[i*8+j][0] = 0; accs[i*8+j][1] = 0; accs[i*8+j][2] = 0;
          FF.add_particle(part_mass, part_radius, dt, prev_poss[i*8+j], poss[i*8+j],
-                         vels[i*8+j], accs[i*8+j], i);
+                         vels[i*8+j], accs[i*8+j], i, 0.3, 20.0);
       }
    }
    for (uint i = 0; i < FF.fluids.size(); i++) {
-      FF.fluids[i]->init(20.0, 20.0);
+      FF.fluids[i]->init();
       for (uint j = 0; j < FF.fluids[i]->pl.size(); j++) {
          FF.fluids[i]->pl[i]->init();
          FF.fluids[i]->pl[i]->dens = FF.fluids[i]->init_dens;
@@ -199,7 +199,7 @@ void draw_cup(){
 
 void draw_fluid() {
    for (int i = 0; i<FF.fluids.size(); i++) {
-      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[i % (sizeof(color)/sizeof(*color))]);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[(i + 2) % (sizeof(color)/sizeof(*color))]);
       for (int j = 0; j < FF.fluids[i]->pl.size(); j++) {
          glPushMatrix();
          glTranslatef(FF.fluids[i]->pl[j]->pos[0], FF.fluids[i]->pl[j]->pos[1],

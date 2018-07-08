@@ -21,9 +21,9 @@ public:
     this->floors.push_back(boost::shared_ptr<static_floor>(new static_floor(_org, _norm, _elas)));
   }
 
-  void add_particle(double _elas, double _mass, double _radius, double* _prev_pos, double* _pos, double* _vel, double* _acc, int i=0) {
+  void add_particle(double _elas, double _mass, double _radius, double* _prev_pos, double* _pos, double* _vel, double* _acc, int i=0, double _kern_size=20.0, double _init_dens=20.0) {
     while ( this->fluids.size() <= i )
-      this->fluids.push_back(boost::shared_ptr<fluid>(new fluid));
+      this->fluids.push_back(boost::shared_ptr<fluid>(new fluid(_kern_size, _init_dens)));
     this->fluids[i]->add_particle(_elas, _mass, _radius, _prev_pos, _pos, _vel, _acc);
   }
 
@@ -60,8 +60,8 @@ public:
   void floor_collision_penalty_all(bool apply_grav=true) {
     for (int i=0; i<this->fluids.size(); i++) {
       for (int j=0; j<this->fluids[i]->pl.size(); j++) {
-        floor_collision_penalty(this->fluids[i]->pl[j] ,apply_grav);
-        // floor_collision_pos_response(this->fluids[i]->pl[j] ,apply_grav);
+        // floor_collision_penalty(this->fluids[i]->pl[j] ,apply_grav);
+        floor_collision_pos_response(this->fluids[i]->pl[j] ,apply_grav);
       }
     }
   }

@@ -54,7 +54,7 @@ public:
   void init() {
     this->poly6_coeff = 315.0/(64 *PI * pow(this->kern_size, 9));
     this->spikey_coeff = -45.0/(PI * pow(this->kern_size, 6));
-    this->visc_laplacian_coeff = 45.0/(PI * pow(this->kern_size, 6)); // ???
+    this->visc_laplacian_coeff = 45.0/(PI * pow(this->kern_size, 6));
   }
 
   void update_grid() {

@@ -4,8 +4,8 @@
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
-#define WALL_DGAIN 3e4
-#define WALL_VGAIN 5e2
+#define WALL_DGAIN 5e3
+#define WALL_VGAIN 5e1
 
 class floors_fluid {
 public:
@@ -33,7 +33,12 @@ public:
     for (int k=0; k<this->floors.size(); k++) {
       double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
         - part->radius;
-      if (dist_to_floor < 0) {
+      Eigen::Vector3d proj_point = part->pos - (dist_to_floor + part->radius)
+        * this->floors[k]->norm_vec;
+      if (dist_to_floor < 0
+          && proj_point[0] > floors[k]->min_x && proj_point[0] < floors[k]->max_x
+          && proj_point[1] > floors[k]->min_y && proj_point[1] < floors[k]->max_y
+          && proj_point[2] > floors[k]->min_z && proj_point[2] < floors[k]->max_z) {
         part->force += part->mass * (- WALL_DGAIN*dist_to_floor - WALL_VGAIN*
                         part->vel.dot(this->floors[k]->norm_vec)) * this->floors[k]->norm_vec;
       }
@@ -47,12 +52,17 @@ public:
     for (int k=0; k<this->floors.size(); k++) {
       double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
         - part->radius;
-      if (dist_to_floor < 0) {
-         part->pos -= this->floors[k]->norm_vec * dist_to_floor;
-         vel_on_norm = part->vel.dot(this->floors[k]->norm_vec) * this->floors[k]->norm_vec;
-         vel_other = part->vel - vel_on_norm;
-         part->vel = vel_other - vel_on_norm * this->floors[k]->elasticity;
-         part->prev_pos = part->pos - part->vel * part->last_dt;
+      Eigen::Vector3d proj_point = part->pos - (dist_to_floor + part->radius)
+        * this->floors[k]->norm_vec;
+      if (dist_to_floor < 0
+          && proj_point[0] > floors[k]->min_x && proj_point[0] < floors[k]->max_x
+          && proj_point[1] > floors[k]->min_y && proj_point[1] < floors[k]->max_y
+          && proj_point[2] > floors[k]->min_z && proj_point[2] < floors[k]->max_z) {
+        part->pos -= this->floors[k]->norm_vec * dist_to_floor;
+        vel_on_norm = part->vel.dot(this->floors[k]->norm_vec) * this->floors[k]->norm_vec;
+        vel_other = part->vel - vel_on_norm;
+        part->vel = vel_other - vel_on_norm * this->floors[k]->elasticity;
+        part->prev_pos = part->pos - part->vel * part->last_dt;
       }
     }
   }

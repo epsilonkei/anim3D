@@ -16,8 +16,8 @@ int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
 int refreshMillis = 30;      // Refresh period in milliseconds
-// double dt = refreshMillis * 1e-4;
-double dt = 1e-3;
+double dt = refreshMillis * 1e-4;
+// double dt = 1e-3;
 
 #define N_part_per_fluid 1000
 #define N_fluid 1
@@ -25,12 +25,13 @@ double part_mass = 1e-3, part_radius = 0.05;
 double prev_poss[N_part_per_fluid * N_fluid][3], poss[N_part_per_fluid * N_fluid][3],
    vels[N_part_per_fluid * N_fluid][3], accs[N_part_per_fluid * N_fluid][3];
 
-#define N_floor 5
+#define N_floor 6
 double floor_elass[N_floor];
 double floor_orgs[N_floor][3], floor_norms[N_floor][3];
 
 #define cup_side 1.0
-#define h_cup 3.0
+#define h_cup 4.0
+#define slide_angle 30.0 * PI / 180
 floors_fluid FF;
 
 static double org_dist = 13.0, org_pitch = 80.0, org_yaw = 0.0;
@@ -58,26 +59,26 @@ float color[][4] = {{0.9, 0.1, 0.1, 1.0}, // red
 
 /* Initialize OpenGL Graphics */
 void initGL() {
-  // glClearColor (1.0, 1.0, 1.0, 1.0);
-  glClearColor (0.0, 0.0, 0.0, 1.0);
-  glClearDepth( 1.0 );
+   // glClearColor (1.0, 1.0, 1.0, 1.0);
+   glClearColor (0.0, 0.0, 0.0, 1.0);
+   glClearDepth( 1.0 );
 
-  // Depth Test
-  glEnable( GL_DEPTH_TEST );
-  glDepthFunc( GL_LESS );
+   // Depth Test
+   glEnable( GL_DEPTH_TEST );
+   glDepthFunc( GL_LESS );
 
-  glShadeModel (GL_SMOOTH);
+   glShadeModel (GL_SMOOTH);
 
-  // Default light
-  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_ambient);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
+   // Default light
+   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_ambient);
+   glEnable(GL_LIGHTING);
+   glEnable(GL_LIGHT0);
 }
 
 void initFloor() {
-   floor_elass[0] = 1;
+   floor_elass[0] = 0.8;
    floor_orgs[0][0] = floor_orgs[0][1] = floor_orgs[0][2] = 0;
    floor_norms[0][0] = floor_norms[0][1] = 0; floor_norms[0][2] = 1;
    FF.add_floor(floor_orgs[0], floor_norms[0], floor_elass[0]);
@@ -85,33 +86,57 @@ void initFloor() {
 
 void initCup() {
    // for side wall
-   floor_elass[1] = 1;
+   floor_elass[1] = 0.8;
    floor_orgs[1][0] = -cup_side;floor_orgs[1][1] = 0;floor_orgs[1][2] = 0;
    floor_norms[1][0] = 1;floor_norms[1][1] = 0; floor_norms[1][2] = 0;
    FF.add_floor(floor_orgs[1], floor_norms[1], floor_elass[1]);
+   FF.floors[1]->set_ylimit(-cup_side, cup_side);
+   FF.floors[1]->set_zlimit(0, h_cup);
    //
-   floor_elass[2] = 1;
+   floor_elass[2] = 0.8;
    floor_orgs[2][0] = cup_side;floor_orgs[2][1] = 0;floor_orgs[2][2] = 0;
    floor_norms[2][0] = -1;floor_norms[2][1] = 0; floor_norms[2][2] = 0;
    FF.add_floor(floor_orgs[2], floor_norms[2], floor_elass[2]);
+   double z_min_slide = 0.2 * h_cup;
+   FF.floors[2]->set_ylimit(-cup_side, cup_side);
+   FF.floors[2]->set_zlimit(0, z_min_slide);
    //
-   floor_elass[3] = 1;
+   floor_elass[3] = 0.8;
    floor_orgs[3][0] = 0;floor_orgs[3][1] = -cup_side;floor_orgs[3][2] = 0;
    floor_norms[3][0] = 0;floor_norms[3][1] = 1; floor_norms[3][2] = 0;
    FF.add_floor(floor_orgs[3], floor_norms[3], floor_elass[3]);
+   FF.floors[3]->set_xlimit(-cup_side, cup_side);
+   FF.floors[3]->set_zlimit(0, h_cup);
    //
-   floor_elass[4] = 1;
+   floor_elass[4] = 0.8;
    floor_orgs[4][0] = 0;floor_orgs[4][1] = cup_side;floor_orgs[4][2] = 0;
    floor_norms[4][0] = 0;floor_norms[4][1] = -1; floor_norms[4][2] = 0;
    FF.add_floor(floor_orgs[4], floor_norms[4], floor_elass[4]);
+   FF.floors[4]->set_xlimit(-cup_side, cup_side);
+   FF.floors[4]->set_zlimit(0, h_cup);
+}
+
+void initSlide() {
+   double z_min_slide = 0.2 * h_cup;
+   floor_elass[5] = 0.8;
+   floor_orgs[5][0] = cup_side;floor_orgs[5][1] = cup_side;floor_orgs[5][2] = z_min_slide;
+   floor_norms[5][0] = -sin(slide_angle);floor_norms[5][1] = 0;floor_norms[5][2] = cos(slide_angle);
+   FF.add_floor(floor_orgs[5], floor_norms[5], floor_elass[5]);
+   //
+   double x_max_slide = 5 * cup_side;
+   double z_max_slide = (- (x_max_slide - cup_side) * FF.floors[5]->norm_vec[0])
+      / FF.floors[5]->norm_vec[2] + z_min_slide;
+   FF.floors[5]->set_xlimit(cup_side, x_max_slide);
+   FF.floors[5]->set_ylimit(-cup_side, cup_side);
+   FF.floors[5]->set_zlimit(z_min_slide, z_max_slide);
 }
 
 void initFluid() {
    for (uint i = 0; i < N_fluid; i++) {
       for (uint j = 0; j < N_part_per_fluid; j++) {
-         poss[i*8+j][0] = double(rand()) / RAND_MAX * 2 * cup_side - cup_side;
-         poss[i*8+j][1] = double(rand()) / RAND_MAX * 2 * cup_side - cup_side;
-         poss[i*8+j][2] = double(rand()) / RAND_MAX * h_cup + h_cup;
+         poss[i*8+j][0] = (double(rand()) / RAND_MAX * 2 * cup_side + 3 * cup_side ) * 0.95;
+         poss[i*8+j][1] = (double(rand()) / RAND_MAX * 2 * cup_side - cup_side) * 0.95;
+         poss[i*8+j][2] = double(rand()) / RAND_MAX * h_cup + 1.5*h_cup;
          //
          prev_poss[i*8+j][0] = poss[i*8+j][0];
          prev_poss[i*8+j][1] = poss[i*8+j][1];
@@ -135,6 +160,7 @@ void initSim() {
    initFluid();
    initFloor();
    initCup();
+   initSlide();
 }
 
 void physics_calculate(){
@@ -174,10 +200,11 @@ void draw_cup(){
    glVertex3f (-cup_side, -cup_side, 0);
    //
    glColor3f(0.2, 0.2, 0.2);
+   double z_min_slide = FF.floors[5]->min_z;
    glVertex3f ( cup_side, -cup_side, 0);
    glVertex3f ( cup_side,  cup_side, 0);
-   glVertex3f ( cup_side,  cup_side, h_cup);
-   glVertex3f ( cup_side, -cup_side, h_cup);
+   glVertex3f ( cup_side,  cup_side, z_min_slide);
+   glVertex3f ( cup_side, -cup_side, z_min_slide);
    //
    glVertex3f ( cup_side,  cup_side, 0);
    glVertex3f (-cup_side,  cup_side, 0);
@@ -193,6 +220,21 @@ void draw_cup(){
    // glVertex3f ( cup_side, -cup_side, 0);
    // glVertex3f ( cup_side, -cup_side, h_cup);
    // glVertex3f (-cup_side, -cup_side, h_cup);
+   //
+   glEnd(); glEnable(GL_LIGHTING);
+}
+
+void draw_slide() {
+   glDisable(GL_LIGHTING); glBegin(GL_QUADS);
+   glColor3f(0.2, 0.2, 0.2);
+   double x_max_slide = FF.floors[5]->max_x;
+   double z_min_slide = FF.floors[5]->min_z;
+   double z_max_slide = FF.floors[5]->max_z;
+   // slide
+   glVertex3f ( cup_side, -cup_side, z_min_slide);
+   glVertex3f ( cup_side,  cup_side, z_min_slide);
+   glVertex3f ( x_max_slide,  cup_side, z_max_slide);
+   glVertex3f ( x_max_slide, -cup_side, z_max_slide);
    //
    glEnd(); glEnable(GL_LIGHTING);
 }
@@ -219,6 +261,7 @@ void display() {
    gluLookAt(0.0, 0.0, distance, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
    glRotatef( -pitch, 1.0, 0.0, 0.0 );
    glRotatef( -yaw, 0.0, 1.0, 0.0 );
+   physics_calculate();
 #if ENABLE_TIMER
    stop_watch display_timer = stop_watch();
    display_timer.start();
@@ -226,13 +269,13 @@ void display() {
    draw_floor();
    draw_origin();
    draw_cup();
+   draw_slide();
    draw_fluid();
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
 #if ENABLE_TIMER
    display_timer.stop();
    std::cerr << "display_time: " << display_timer.getTime() << std::endl;
 #endif
-   physics_calculate();
 }
 
 /* Call back when the windows is re-sized */
@@ -290,42 +333,42 @@ void specialKeys(int key, int x, int y) {
 /* Callback handler for mouse event */
 void mouse(int button, int state, int x, int y)
 {
-  mouse_button = button;
-  mouse_x = x; mouse_y = y;
-  if(state == GLUT_UP){
-    mouse_button = -1;
-  }
-  glutPostRedisplay();
+   mouse_button = button;
+   mouse_x = x; mouse_y = y;
+   if(state == GLUT_UP){
+      mouse_button = -1;
+   }
+   glutPostRedisplay();
 }
 
 void motion(int x, int y)
 {
-  switch(mouse_button){
-  case GLUT_LEFT_BUTTON:
-    if( x == mouse_x && y == mouse_y )
-      return;
-    yaw -= (GLfloat) (x - mouse_x) / 2.0;
-    pitch -= (GLfloat) (y - mouse_y) / 2.0;
-    break;
-  case GLUT_RIGHT_BUTTON:
-    if( y == mouse_y )
-      return;
-    if( y < mouse_y )
-      distance += (GLfloat) (mouse_y - y)/50.0;
-    else
-      distance -= (GLfloat) (y - mouse_y)/50.0;
-    if( distance < 1.0 ) distance = 1.0;
-    if( distance > 50.0 ) distance = 50.0;
-    break;
-  }
-  mouse_x = x;
-  mouse_y = y;
-  glutPostRedisplay();
+   switch(mouse_button){
+   case GLUT_LEFT_BUTTON:
+      if( x == mouse_x && y == mouse_y )
+         return;
+      yaw -= (GLfloat) (x - mouse_x) / 2.0;
+      pitch -= (GLfloat) (y - mouse_y) / 2.0;
+      break;
+   case GLUT_RIGHT_BUTTON:
+      if( y == mouse_y )
+         return;
+      if( y < mouse_y )
+         distance += (GLfloat) (mouse_y - y)/50.0;
+      else
+         distance -= (GLfloat) (y - mouse_y)/50.0;
+      if( distance < 1.0 ) distance = 1.0;
+      if( distance > 50.0 ) distance = 50.0;
+      break;
+   }
+   mouse_x = x;
+   mouse_y = y;
+   glutPostRedisplay();
 }
 
 void idle()
 {
-  glutPostRedisplay();
+   glutPostRedisplay();
 }
 
 /* Main function: GLUT runs as a console application starting at main() */

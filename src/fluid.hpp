@@ -6,6 +6,7 @@
 #include <vector>
 #include "particle.hpp"
 #include "spatial_grid.hpp"
+#include "stop_watch.hpp"
 
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
@@ -18,6 +19,7 @@ double MOTION_DP_COEFF = 0.0;
 double COURANT_SAFETY_FACTOR = 1.0;
 double SPECIFIC_HEATS_RATIO = 1.0;
 double EPSILON = 1e-9;
+bool IS_MOTION_DAMPING_ENABLED = true;
 
 class fluid {
 public:
@@ -143,14 +145,14 @@ public:
       // }
       // motion damping;
       mag = acc.norm();
-      // if (motion_damping_enabled) {
-      //   damp = pl[i]->vel * MOTION_DP_COEFF;
-      //   if (damp.norm() > mag) {
-      //     acc = Eigen::Vector3d::Zero();
-      //   } else {
-      //     acc -= damp;
-      //   }
-      // }
+      if (IS_MOTION_DAMPING_ENABLED) {
+        damp = pl[i]->vel * MOTION_DP_COEFF;
+        if (damp.norm() > mag) {
+          acc = Eigen::Vector3d::Zero();
+        } else {
+          acc -= damp;
+        }
+      }
       if (mag > MAX_ACC) {
         acc = (acc / mag) * MAX_ACC;
       }
@@ -186,14 +188,36 @@ public:
 
   void update(double dt) {
     double time_left = dt, time_step;
+#if ENABLE_TIMER
+    stop_watch update_grid_timer = stop_watch();
+    stop_watch find_neighbor_timer = stop_watch();
+    stop_watch update_dens_and_pres_timer = stop_watch();
+    stop_watch update_fluid_acc_timer = stop_watch();
+    stop_watch particles_timer = stop_watch();
+#endif // ENABLE_TIMER
     while (time_left > 0.0) {
+#if ENABLE_TIMER
+      update_grid_timer.start();
       update_grid();
+      update_grid_timer.stop();
       // Search neighboring particles
+      find_neighbor_timer.start();
       find_neighbor();
+      find_neighbor_timer.stop();
       // Update density and pressure
+      update_dens_and_pres_timer.start();
       update_density_and_pressure();
+      update_dens_and_pres_timer.stop();
       // Update acceleration
+      update_fluid_acc_timer.start();
       update_fluid_acc();
+      update_fluid_acc_timer.stop();
+#else
+      update_grid();
+      find_neighbor();
+      update_density_and_pressure();
+      update_fluid_acc();
+#endif // ENABLE_TIMER
       // calculate next time step
       time_step = calc_time_step();
       time_left -= time_step;
@@ -201,12 +225,25 @@ public:
         time_step = time_step + time_left;
         time_left = 0.0;
       }
+#if ENABLE_TIMER
+      particles_timer.start();
+#endif // ENABLE_TIMER
       // Move particles
       for(uint i=0; i<pl.size(); i++) {
         pl[i]->updateVerlet(time_step);
       }
+#if ENABLE_TIMER
+      particles_timer.stop();
+#endif //ENABLE_TIMER
       // updateFluidPosition(time_step);
       // updateObstacleVelocity(time_step);
     }
+#if ENABLE_TIMER
+    std::cerr << "update_grid_time: " << update_grid_timer.getTime() << std::endl;
+    std::cerr << "find_neighbor_time: " << find_neighbor_timer.getTime() << std::endl;
+    std::cerr << "update_dens_and_pres_time: " << update_dens_and_pres_timer.getTime() << std::endl;
+    std::cerr << "update_fluid_acc_time: " << update_fluid_acc_timer.getTime() << std::endl;
+    std::cerr << "particles_time: " << particles_timer.getTime() << std::endl;
+#endif // ENABLE_TIMER
   }
 };

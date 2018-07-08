@@ -68,7 +68,15 @@ public:
 
   void update_movement(double dt) {
     // Notes: initial force was apply in floor collision penalty function
+#if ENABLE_TIMER
+    stop_watch floors_collision_timer = stop_watch();
+    floors_collision_timer.start();
+#endif // ENABLE_TIMER
     floor_collision_penalty_all(true);
+#if ENABLE_TIMER
+    floors_collision_timer.stop();
+    std::cerr << "floors_collision_time: " << floors_collision_timer.getTime() << std::endl;
+#endif // ENABLE_TIMER
     // for (int i=0; i<this->rl.size(); i++ ) {
     //   for (int j=i+1; j<this->rl.size(); j++ ) {
     //     collide_penalty(this->rl[i], this->rl[j]);

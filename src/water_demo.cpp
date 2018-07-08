@@ -219,11 +219,19 @@ void display() {
    gluLookAt(0.0, 0.0, distance, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
    glRotatef( -pitch, 1.0, 0.0, 0.0 );
    glRotatef( -yaw, 0.0, 1.0, 0.0 );
+#if ENABLE_TIMER
+   stop_watch display_timer = stop_watch();
+   display_timer.start();
+#endif
    draw_floor();
    draw_origin();
    draw_cup();
    draw_fluid();
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
+#if ENABLE_TIMER
+   display_timer.stop();
+   std::cerr << "display_time: " << display_timer.getTime() << std::endl;
+#endif
    physics_calculate();
 }
 

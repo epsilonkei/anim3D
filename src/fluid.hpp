@@ -137,9 +137,9 @@ public:
       //     acc -= (massRatio*pterm*spikey)*r;
       //     // acceleration due to viscosity term
       //     // if (!pl[j]->isObstacle) {
-      //     //   lap = this->visc_laplacian_coeff * diff;
-      //     //   vdiff = pl[j]->vel - pl[i]->vel;
-      //     //   acc += (VISC_COEFF * massRatio * (1/pl[j]->dens) * lap) *vdiff;
+      //     lap = this->visc_laplacian_coeff * diff;
+      //     vdiff = pl[j]->vel - pl[i]->vel;
+      //     acc += (VISC_COEFF * massRatio * (1/pl[j]->dens) * lap) *vdiff;
       //     // }
       //   }
       // }

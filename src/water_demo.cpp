@@ -30,9 +30,9 @@ int refreshMillis = 30;      // Refresh period in milliseconds
 double dt = refreshMillis * 1e-3;
 // double dt = 1e-3;
 int frameRate = 1000 / refreshMillis;
-#define MAX_TIME 20
+#define MAX_TIME 30
 
-#define N_part_per_fluid 1000
+#define N_part_per_fluid 500
 #define N_fluid 1
 double part_mass = 1e-3, part_radius = 0.05;
 double prev_poss[N_part_per_fluid * N_fluid][3], poss[N_part_per_fluid * N_fluid][3],
@@ -47,7 +47,7 @@ double floor_orgs[N_floor][3], floor_norms[N_floor][3];
 #define slide_angle 30.0 * PI / 180
 floors_fluid FF;
 
-static double org_dist = 13.0, org_pitch = 80.0, org_yaw = 0.0;
+static double org_dist = 13.0, org_pitch = 70.0, org_yaw = 0.0;
 double distance = org_dist, pitch = org_pitch, yaw = org_yaw;
 int mouse_button = -1;
 int mouse_x = 0, mouse_y = 0;

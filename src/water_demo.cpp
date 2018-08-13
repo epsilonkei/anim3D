@@ -19,6 +19,8 @@ static const GLuint FORMAT_NBYTES = 4;
 static unsigned int nscreenshots = 0;
 static double timeInSim = 0.0;
 
+static int count = 0;
+
 // Global variables
 char title[] = "Full-Screen & Windowed Mode";  // Windowed mode's title
 int windowWidth  = 640;     // Windowed mode's width
@@ -208,6 +210,7 @@ void initSim() {
 void physics_calculate(){
    FF.update_movement(dt);
    timeInSim += dt;
+   count ++;
 }
 
 void draw_floor(){
@@ -317,7 +320,8 @@ void display() {
    glutSwapBuffers();  // Swap front and back buffers (of double buffered mode)
 #if ENABLE_TIMER
    display_timer.stop();
-   std::cerr << "display_time: " << display_timer.getTime() << std::endl;
+   // std::cerr << "display_time: " << display_timer.getTime() << std::endl;
+   std::cerr << display_timer.getTime() << std::endl;
 #endif
 #if ENABLE_SCREEN_SHOT
    glReadPixels(0, 0, windowWidth, windowHeight, FORMAT, GL_UNSIGNED_BYTE, pixels);
@@ -326,6 +330,7 @@ void display() {
    nscreenshots++;
 #endif //ENABLE_SCREEN_SHOT
    if (timeInSim > MAX_TIME) exit(0);
+   // if (count >= 5) exit(0);
 }
 
 /* Call back when the windows is re-sized */

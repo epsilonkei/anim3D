@@ -85,7 +85,8 @@ public:
     floor_collision_penalty_all(true);
 #if ENABLE_TIMER
     floors_collision_timer.stop();
-    std::cerr << "floors_collision_time: " << floors_collision_timer.getTime() << std::endl;
+    // std::cerr << "floors_collision_time: " << floors_collision_timer.getTime() << std::endl;
+    std::cerr << floors_collision_timer.getTime() << " ";
 #endif // ENABLE_TIMER
     // for (int i=0; i<this->rl.size(); i++ ) {
     //   for (int j=i+1; j<this->rl.size(); j++ ) {

@@ -9,9 +9,12 @@ sudo apt-get install libboost-all-dev #Boost
 
 * Compile
 ```
-mkdir build
-cd build
+# Compile
+mkdir build_assign3
+cd build_assign3
 cmake ..
 make
-./anim3D
+
+# Execute
+./water_demo
 ```

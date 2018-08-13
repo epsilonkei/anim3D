@@ -239,11 +239,16 @@ public:
       // updateObstacleVelocity(time_step);
     }
 #if ENABLE_TIMER
-    std::cerr << "update_grid_time: " << update_grid_timer.getTime() << std::endl;
-    std::cerr << "find_neighbor_time: " << find_neighbor_timer.getTime() << std::endl;
-    std::cerr << "update_dens_and_pres_time: " << update_dens_and_pres_timer.getTime() << std::endl;
-    std::cerr << "update_fluid_acc_time: " << update_fluid_acc_timer.getTime() << std::endl;
-    std::cerr << "particles_time: " << particles_timer.getTime() << std::endl;
+    // std::cerr << "update_grid_time: " << update_grid_timer.getTime() << std::endl;
+    // std::cerr << "find_neighbor_time: " << find_neighbor_timer.getTime() << std::endl;
+    // std::cerr << "update_dens_and_pres_time: " << update_dens_and_pres_timer.getTime() << std::endl;
+    // std::cerr << "update_fluid_acc_time: " << update_fluid_acc_timer.getTime() << std::endl;
+    // std::cerr << "particles_time: " << particles_timer.getTime() << std::endl;
+    std::cerr << update_grid_timer.getTime() << " ";
+    std::cerr << find_neighbor_timer.getTime() << " ";
+    std::cerr << update_dens_and_pres_timer.getTime() << " ";
+    std::cerr << update_fluid_acc_timer.getTime() << " ";
+    std::cerr << particles_timer.getTime() << " ";
 #endif // ENABLE_TIMER
   }
 };

@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <iostream>
 #include "floors_fluid.hpp"
+#include <sys/stat.h>
 
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
@@ -22,6 +23,7 @@ static double timeInSim = 0.0;
 static int count = 0;
 
 // Global variables
+char img_folder[] = "/tmp/water/";
 char title[] = "Full-Screen & Windowed Mode";  // Windowed mode's title
 int windowWidth  = 640;     // Windowed mode's width
 int windowHeight = 480;     // Windowed mode's height
@@ -84,6 +86,15 @@ void initGL() {
    glLoadIdentity();
    glMatrixMode(GL_MODELVIEW);
    pixels = (GLubyte*)malloc(FORMAT_NBYTES * windowWidth * windowHeight);
+
+   struct stat sb;
+   if (!stat(img_folder, &sb) == 0 || !S_ISDIR(sb.st_mode)) {
+      const int dir_err = mkdir(img_folder, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+      if (dir_err == -1) {
+         std::cerr <<"Error creating directory!" << std::endl;
+         exit(1);
+      }
+   }
 
    // Depth Test
    glEnable( GL_DEPTH_TEST );
@@ -326,7 +337,8 @@ void display() {
 #if ENABLE_SCREEN_SHOT
    glReadPixels(0, 0, windowWidth, windowHeight, FORMAT, GL_UNSIGNED_BYTE, pixels);
    puts("screenshot");
-   create_ppm("/tmp/water/", nscreenshots, windowWidth, windowHeight, 255, FORMAT_NBYTES, pixels);
+   // create_ppm("/tmp/water/", nscreenshots, windowWidth, windowHeight, 255, FORMAT_NBYTES, pixels);
+   create_ppm(img_folder, nscreenshots, windowWidth, windowHeight, 255, FORMAT_NBYTES, pixels);
    nscreenshots++;
 #endif //ENABLE_SCREEN_SHOT
    if (timeInSim > MAX_TIME) exit(0);

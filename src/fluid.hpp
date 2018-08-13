@@ -6,7 +6,7 @@
 #include <vector>
 #include "particle.hpp"
 #include "spatial_grid.hpp"
-#include "stop_watch.hpp"
+#include "utils/stop_watch.hpp"
 
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;

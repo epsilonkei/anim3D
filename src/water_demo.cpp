@@ -2,13 +2,11 @@
 #include <cmath>
 #include <Eigen/Dense>
 #include <iostream>
-#include "floors_fluid.hpp"
 #include <sys/stat.h>
+#include "floors_fluid.hpp"
+#include "utils/save_image.hpp"
 
 #define GL_GLEXT_PROTOTYPES 1
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
 
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
@@ -80,12 +78,14 @@ void initGL() {
    // glClearColor (1.0, 1.0, 1.0, 1.0);
    glClearColor (0.0, 0.0, 0.0, 1.0);
    glClearDepth( 1.0 );
+#if ENABLE_SCREEN_SHOT
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
    glViewport(0, 0, windowWidth, windowHeight);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
    glMatrixMode(GL_MODELVIEW);
    pixels = (GLubyte*)malloc(FORMAT_NBYTES * windowWidth * windowHeight);
+#endif //ENABLE_SCREEN_SHOT
 
    struct stat sb;
    if (!stat(img_folder, &sb) == 0 || !S_ISDIR(sb.st_mode)) {
@@ -112,24 +112,6 @@ void initGL() {
 
 void deinit()  {
     free(pixels);
-}
-
-static void create_ppm(char *prefix, int frame_id, unsigned int width, unsigned int height,
-        unsigned int color_max, unsigned int pixel_nbytes, GLubyte *pixels) {
-    size_t i, j, k, cur;
-    enum Constants { max_filename = 256 };
-    char filename[max_filename];
-    snprintf(filename, max_filename, "%s%d.ppm", prefix, frame_id);
-    FILE *f = fopen(filename, "w");
-    fprintf(f, "P3\n%d %d\n%d\n", width, windowHeight, 255);
-    for (i = 0; i < height; i++) {
-        for (j = 0; j < width; j++) {
-            cur = pixel_nbytes * ((height - i - 1) * width + j);
-            fprintf(f, "%3d %3d %3d ", pixels[cur], pixels[cur + 1], pixels[cur + 2]);
-        }
-        fprintf(f, "\n");
-    }
-    fclose(f);
 }
 
 void initFloor() {

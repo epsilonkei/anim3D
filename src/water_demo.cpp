@@ -318,8 +318,7 @@ void display() {
 #endif
 #if ENABLE_SCREEN_SHOT
    glReadPixels(0, 0, windowWidth, windowHeight, FORMAT, GL_UNSIGNED_BYTE, pixels);
-   puts("screenshot");
-   // create_ppm("/tmp/water/", nscreenshots, windowWidth, windowHeight, 255, FORMAT_NBYTES, pixels);
+   // puts("screenshot");
    create_ppm(img_folder, nscreenshots, windowWidth, windowHeight, 255, FORMAT_NBYTES, pixels);
    nscreenshots++;
 #endif //ENABLE_SCREEN_SHOT

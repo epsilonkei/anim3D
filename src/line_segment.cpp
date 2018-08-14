@@ -25,10 +25,6 @@ double ballRadius = 0.2;   // Radius of the bouncing ballRadius
 double prev_pos[] = {0,0,2}, pos[] = {0,0,2}, vel[] ={0,0,0}, acc[] = {0,0,0};
 particle Ball(ballMass, ballRadius, dt, prev_pos, pos, vel, acc);
 
-// double floor_elas = 1.0;
-// double floor_org[] = {0,0,0}, floor_norm[] = {0,0,1};
-// static_floor Floor0(floor_org, floor_norm, floor_elas);
-
 double start[] = {0,0,-5}, end[] = {0,0,5}, line_length = 10;
 line_segment Line0(start, end);
 
@@ -57,20 +53,16 @@ double rotate_ang = 1 * dt; // unit: deg/s * s
 void initGL() {
   glClearColor (0.0, 0.0, 0.0, 1.0);
   glClearDepth( 1.0 );
-
   // Depth Test
   glEnable( GL_DEPTH_TEST );
   glDepthFunc( GL_LESS );
-
   glShadeModel (GL_SMOOTH);
-
   // Default light
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_ambient);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-
   Ball.init();
   if (applyGravity) {                     // Apply Gravity mode
      Ball.force = - 0.05 * Ball.mass * grav * e3;

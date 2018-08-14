@@ -7,7 +7,7 @@
 #include "pendulums.hpp"
 #define PI 3.14159265
 
-std::ofstream result_file;
+// std::ofstream result_file;
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 double energy = 0;
@@ -51,20 +51,16 @@ void initGL() {
   // glClearColor (1.0, 1.0, 1.0, 1.0);
   glClearColor (0.0, 0.0, 0.0, 1.0);
   glClearDepth( 1.0 );
-
   // Depth Test
   glEnable( GL_DEPTH_TEST );
   glDepthFunc( GL_LESS );
-
   glShadeModel (GL_SMOOTH);
-
   // Default light
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_ambient);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-
 }
 
 void initSim() {
@@ -97,7 +93,7 @@ void initSim() {
       PL.pl[i]->pt.init();
       PL.pl[i]->pt.force = - PL.pl[i]->pt.mass * grav * e3;
    }
-   result_file.open("/tmp/newton_cradle_energy.dat");
+   // result_file.open("/tmp/newton_cradle_energy.dat");
 }
 
 void physics_calculate(){
@@ -109,7 +105,7 @@ void physics_calculate(){
    for (int i = 0; i < PL.pl.size(); i++) {
       energy += PL.pl[i]->pt.mass * (PL.pl[i]->pt.vel.squaredNorm() + grav * PL.pl[i]->pt.pos[2]);
    }
-   result_file << PL.pl[0]->pt.time << " " << energy << "\n";
+   // result_file << PL.pl[0]->pt.time << " " << energy << "\n";
 }
 
 void draw_pendulums(pendulums _PL){
@@ -205,7 +201,7 @@ void Timer(int value) {
 void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
-      result_file.close();
+      // result_file.close();
       exit(0);
       break;
    case 'r':    // r: Reset default camera

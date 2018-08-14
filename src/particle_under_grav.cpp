@@ -7,7 +7,7 @@
 #include <fstream>
 #define PI 3.14159265
 
-std::ofstream result_file;
+// std::ofstream result_file;
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
@@ -74,22 +74,15 @@ void initGL() {
   } else {                                // Non-apply Gravity mode
      Ball.force = Eigen::Vector3d::Zero();
   }
-  result_file.open("/tmp/particle_under_grav_Verlet.dat");
+  // result_file.open("/tmp/particle_under_grav_Verlet.dat");
 }
 
 void physics_calculate(){
    // Animation Control - compute the location for the next refresh
    // Ball.updateEuler(dt);
    Ball.updateVerlet(dt);
-   // Check if the ball collides the floor
-   // double dist_to_floor = Floor0.norm_vec.dot(Ball.pos - Floor0.origin) - Ball.radius;
-   // if (dist_to_floor < 0 && Floor0.norm_vec.dot(Ball.vel) < 0) {
-   //    Ball.vel[2] = - Ball.vel[2] * Floor0.elasticity;
-   //    Ball.pos -= Floor0.norm_vec * dist_to_floor;
-   //    Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
-   // }
-   result_file << Ball.time << " " << Ball.pos[0] << " "
-               << Ball.pos[1] << " " << Ball.pos[2] << "\n";
+   // result_file << Ball.time << " " << Ball.pos[0] << " "
+   //             << Ball.pos[1] << " " << Ball.pos[2] << "\n";
 }
 
 void draw_floor(){
@@ -160,7 +153,7 @@ void Timer(int value) {
 void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
-      result_file.close();
+      // result_file.close();
       exit(0);
       break;
    case 'g':    // g: Apply gravity mode

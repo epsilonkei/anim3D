@@ -7,7 +7,7 @@
 #include <fstream>
 #define PI 3.14159265
 
-std::ofstream result_file;
+// std::ofstream result_file;
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 
@@ -75,7 +75,7 @@ void initGL() {
   } else {                                // Non-apply Gravity mode
      Ball.force = Eigen::Vector3d::Zero();
   }
-  result_file.open("/tmp/floor_collision_Euler.dat");
+  // result_file.open("/tmp/floor_collision_Euler.dat");
 }
 
 void physics_calculate(){
@@ -95,8 +95,8 @@ void physics_calculate(){
          Ball.prev_pos = Ball.pos - Ball.vel * Ball.last_dt;
       }
    }
-   result_file << Ball.time << " " << Ball.pos[0] << " "
-               << Ball.pos[1] << " " << Ball.pos[2] << "\n";
+   // result_file << Ball.time << " " << Ball.pos[0] << " "
+   //             << Ball.pos[1] << " " << Ball.pos[2] << "\n";
 }
 
 void draw_floor(){
@@ -167,7 +167,7 @@ void Timer(int value) {
 void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
-      result_file.close();
+      // result_file.close();
       exit(0);
       break;
    case 'g':    // g: Apply gravity mode

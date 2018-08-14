@@ -5,7 +5,7 @@
 #include <cmath>
 #include <vector>
 #include "particle.hpp"
-#include "spatial_grid.hpp"
+#include "DynamicSpatialGrid/spatial_grid.hpp"
 #include "utils/stop_watch.hpp"
 
 extern double grav;

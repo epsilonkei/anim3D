@@ -24,7 +24,7 @@ The same method can be used to compile and execute for assignment 1 and assignme
 
 ## Demo
 <img src="https://github.com/epsilonkei/anim3D/blob/master/images/wave_demo_snapshot.png" 
-  alt="Wave Demo Snapshot" width="whatever" height=500>
+  alt="Wave Demo Snapshot" width="whatever" height=450>
 ### Particle trajectory under gravity using Verlet Integration: [Video](https://www.youtube.com/watch?v=uvoZv55v3hE)
 ### Elastic collision: [Video](https://www.youtube.com/watch?v=i9KygzlNcBw)
 ### Constraint on a line segment: [Video](https://www.youtube.com/watch?v=kn-lZJEiL0w)

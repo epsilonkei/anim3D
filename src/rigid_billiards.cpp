@@ -82,10 +82,10 @@ void initRigids() {
    // for rigids
    srand(0);
    double com_x, com_y, rgl = rigid_size;
-   for (int i = 0; i < N_rigid; i++) {
+   for (uint i = 0; i < N_rigid; i++) {
       com_x = double(rand()) / RAND_MAX * 2 * table_length - table_length;
       com_y = double(rand()) / RAND_MAX * 2 * table_length - table_length;
-      for (int j = 0; j < N_part_per_rigid; j++) {
+      for (uint j = 0; j < N_part_per_rigid; j++) {
          if (j == 0) {
             poss[i*8+j][0] = com_x - 0.5*rgl; poss[i*8+j][1] = com_y - 0.5*rgl;
             poss[i*8+j][2] = rigid_height;
@@ -124,8 +124,8 @@ void initRigids() {
 
 void initSim() {
    initRigids();
-   for (int i = 0; i < FLR.rl.size(); i++) {
-      for (int j = 0; j < FLR.rl[i]->pl.size(); j++) {
+   for (uint i = 0; i < FLR.rl.size(); i++) {
+      for (uint j = 0; j < FLR.rl[i]->pl.size(); j++) {
          FLR.rl[i]->pl[j]->init();
          // FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
       }
@@ -223,9 +223,9 @@ void draw_rigids(){
    //
    glEnd(); glEnable(GL_LIGHTING);
    // Draw rigids
-   for (int i = 0; i<FLR.rl.size(); i++) {
+   for (uint i = 0; i<FLR.rl.size(); i++) {
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[i % (sizeof(color)/sizeof(*color))]);
-      for (int j = 0; j < FLR.rl[i]->pl.size(); j++) {
+      for (uint j = 0; j < FLR.rl[i]->pl.size(); j++) {
          glPushMatrix();
          glTranslatef(FLR.rl[i]->pl[j]->pos[0], FLR.rl[i]->pl[j]->pos[1], FLR.rl[i]->pl[j]->pos[2]);
          glutSolidSphere (FLR.rl[i]->pl[j]->radius, 16, 16);

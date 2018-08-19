@@ -32,7 +32,7 @@ public:
     // Create next_particle list, Note: assuming object as a cube
     std::vector<int> npl;
     npl.push_back(1); npl.push_back(3); npl.push_back(4);
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       if (i==0) { npl[0] = 1; npl[1] = 3; npl[2] = 4; }
       else if (i==1) { npl[0] = 0; npl[1] = 2; npl[2] = 5; }
       else if (i==2) { npl[0] = 1; npl[1] = 3; npl[2] = 6; }
@@ -46,12 +46,12 @@ public:
     // Calculate center and mass
     this->com = Eigen::Vector3d::Zero();
     this->mass = 0;
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       this->com += this->pl[i]->mass * this->pl[i]->pos;
       this->mass += this->pl[i]->mass;
     }
     this->com /= this->mass;
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       // Update particles relative pos to center
       this->pl[i]->pos_to_cent = this->pl[i]->pos - this->com;
     }
@@ -61,7 +61,7 @@ public:
     double rotn = rot.norm();
     Eigen::Matrix3d dR = Eigen::AngleAxisd(rotn, rot/rotn).toRotationMatrix();
     this->rotation = dR * Eigen::Matrix3d::Identity();
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       this->pl[i]->pos = this->rotation * this->pl[i]->pos_to_cent + this->com;
       this->pl[i]->prev_pos = this->pl[i]->pos - this->pl[i]->vel * dt;
     }
@@ -69,9 +69,9 @@ public:
 
   void update_spring_damper() {
     // only checked distance with next particles
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       // Add spring and dampers force
-      for (int j=0; j<this->next_part[i].size(); j++) {
+      for (uint j=0; j<this->next_part[i].size(); j++) {
         int nid = this->next_part[i][j];
         this->tmp_d = (this->pl[nid]->pos - this->pl[i]->pos);
         double dist = this->tmp_d.norm();

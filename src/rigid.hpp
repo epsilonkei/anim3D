@@ -40,7 +40,7 @@ public:
     // Calculate center and mass
     this->com = Eigen::Vector3d::Zero();
     this->mass = 0;
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       this->com += this->pl[i]->mass * this->pl[i]->pos;
       this->mass += this->pl[i]->mass;
     }
@@ -48,7 +48,7 @@ public:
     this->I_body = Eigen::Matrix3d::Zero();
     // this->lin_moment = Eigen::Vector3d::Zero();
     //
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       // Update particles relative pos to center
       this->pl[i]->pos_to_cent = this->pl[i]->pos - this->com;
       if (this->pl[i]->pos_to_cent.norm() > this->max_radius)
@@ -83,7 +83,7 @@ public:
     // Calculation force and torque
     this->force = Eigen::Vector3d::Zero();
     this->torque = Eigen::Vector3d::Zero();
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       this->force += this->pl[i]->force;
       this->torque += (this->pl[i]->pos - this->com).cross(this->pl[i]->force);
     }
@@ -111,7 +111,7 @@ public:
   }
 
   void update_particles_movement(double dt) {
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       // r_i = R * r0_i + x
       this->pl[i]->prev_pos = this->pl[i]->pos;
       this->pl[i]->pos = this->rotation * this->pl[i]->pos_to_cent + this->com;

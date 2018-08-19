@@ -29,9 +29,9 @@ public:
 
   void init() {
     std::vector<double> cl;
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       cl.clear();
-      for (int j=0; j<this->pl.size(); j++) {
+      for (uint j=0; j<this->pl.size(); j++) {
         if (j==i) cl.push_back(0.0);
         else cl.push_back((this->pl[j]->pos - this->pl[i]->pos).norm());
       }
@@ -40,12 +40,12 @@ public:
     // Calculate center and mass
     this->com = Eigen::Vector3d::Zero();
     this->mass = 0;
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       this->com += this->pl[i]->mass * this->pl[i]->pos;
       this->mass += this->pl[i]->mass;
     }
     this->com /= this->mass;
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       // Update particles relative pos to center
       this->pl[i]->pos_to_cent = this->pl[i]->pos - this->com;
     }
@@ -55,16 +55,16 @@ public:
     double rotn = rot.norm();
     Eigen::Matrix3d dR = Eigen::AngleAxisd(rotn, rot/rotn).toRotationMatrix();
     this->rotation = dR * Eigen::Matrix3d::Identity();
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       this->pl[i]->pos = this->rotation * this->pl[i]->pos_to_cent + this->com;
       this->pl[i]->prev_pos = this->pl[i]->pos - this->pl[i]->vel * dt;
     }
   }
 
   void update_spring_damper() {
-    for (int i=0; i<this->pl.size(); i++) {
+    for (uint i=0; i<this->pl.size(); i++) {
       // Add spring and dampers force
-      for (int j=0; j<this->const_length[i].size(); j++) {
+      for (uint j=0; j<this->const_length[i].size(); j++) {
         if (j == i) continue;
         this->tmp_d = (this->pl[j]->pos - this->pl[i]->pos);
         double dist = this->tmp_d.norm();

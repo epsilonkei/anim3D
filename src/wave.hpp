@@ -49,7 +49,7 @@ public:
   void fix_volume_conservation() {
     double vol = this->volume;
     calc_volume();
-    double add = (volume - this->volume)/(this->max_i*this->max_j);
+    double add = (vol - this->volume)/(this->max_i*this->max_j);
     for ( int i=0; i<this->max_i; i++ ) {
       for ( int j=0; j<this->max_j; j++ ) {
         this->h(i,j) += add;
@@ -82,7 +82,7 @@ public:
   }
 
   void set_exp_height(double _max_h, int _max_i, int _max_j) {
-    double cent_x = this->max_x * 0.5, cent_y = this->max_y * 0.5;
+    // double cent_x = this->max_x * 0.5, cent_y = this->max_y * 0.5;
     int cent_i = this->max_i / 2, cent_j = this->max_j / 2;
     for ( int i=-max_i/2 ; i<_max_i/2; i++ ) {
       if ( i+cent_i>=this->max_i || i+cent_i < 0) break;

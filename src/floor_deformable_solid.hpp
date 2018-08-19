@@ -21,7 +21,7 @@ public:
     this->floors.push_back(boost::shared_ptr<static_floor>(new static_floor(_org, _norm, _elas)));
   }
 
-  void add_particle(double _elas, double _mass, double _radius, double* _prev_pos, double* _pos, double* _vel, double* _acc, int i=0) {
+  void add_particle(double _elas, double _mass, double _radius, double* _prev_pos, double* _pos, double* _vel, double* _acc, uint i=0) {
     while ( this->rl.size() <= i ) this->rl.push_back(boost::shared_ptr<deformable_solid>(new deformable_solid));
     this->rl[i]->add_particle(_elas, _mass, _radius, _prev_pos, _pos, _vel, _acc);
   }
@@ -30,7 +30,7 @@ public:
   void floor_collision_penalty(boost::shared_ptr<particle>& part, bool apply_grav=true) {
     if (apply_grav) part->force = -part->mass * grav * e3;
     else part->force = Eigen::Vector3d::Zero();
-    for (int k=0; k<this->floors.size(); k++) {
+    for (uint k=0; k<this->floors.size(); k++) {
       double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
         - part->radius;
       if (dist_to_floor < 0) {
@@ -41,8 +41,8 @@ public:
   }
 
   void floor_collision_penalty_all(bool apply_grav=true) {
-    for (int i=0; i<this->rl.size(); i++) {
-      for (int j=0; j<this->rl[i]->pl.size(); j++) {
+    for (uint i=0; i<this->rl.size(); i++) {
+      for (uint j=0; j<this->rl[i]->pl.size(); j++) {
         floor_collision_penalty(this->rl[i]->pl[j] ,apply_grav);
       }
     }
@@ -51,12 +51,12 @@ public:
   void update_movement(double dt) {
     // Notes: initial force was apply in floor collision penalty function
     floor_collision_penalty_all(true);
-    for (int i=0; i<this->rl.size(); i++) {
-      for (int j=0; j<this->rl[i]->pl.size(); j++) {
+    for (uint i=0; i<this->rl.size(); i++) {
+      for (uint j=0; j<this->rl[i]->pl.size(); j++) {
         this->rl[i]->pl[j]->updateVerlet(dt);
       }
       this->rl[i]->update_spring_damper();
-      for (int j=0; j<this->rl[i]->pl.size(); j++) {
+      for (uint j=0; j<this->rl[i]->pl.size(); j++) {
         this->rl[i]->pl[j]->updateVerlet(dt);
       }
     }

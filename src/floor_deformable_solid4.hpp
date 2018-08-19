@@ -32,7 +32,7 @@ public:
   void floor_collision_penalty(boost::shared_ptr<particle>& part, bool apply_grav=true) {
     if (apply_grav) part->force = -part->mass * grav * e3;
     else part->force = Eigen::Vector3d::Zero();
-    for (int k=0; k<this->floors.size(); k++) {
+    for (uint k=0; k<this->floors.size(); k++) {
       double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
         - part->radius;
       if (dist_to_floor < 0) {
@@ -48,8 +48,8 @@ public:
   }
 
   void floor_collision_penalty_all(bool apply_grav=true) {
-    for (int i=0; i<this->rl.size(); i++) {
-      for (int j=0; j<this->rl[i]->pl.size(); j++) {
+    for (uint i=0; i<this->rl.size(); i++) {
+      for (uint j=0; j<this->rl[i]->pl.size(); j++) {
         floor_collision_penalty(this->rl[i]->pl[j] ,apply_grav);
       }
     }
@@ -58,19 +58,19 @@ public:
   void update_movement(double dt) {
     // Notes: initial force was apply in floor collision penalty function
     floor_collision_penalty_all(true);
-    for (int i=0; i<this->rl.size(); i++) {
+    for (uint i=0; i<this->rl.size(); i++) {
       this->rl[i]->update_rigid_movement(dt);
       this->rl[i]->update_particles_movement(dt);
     }
-    for (int i=0; i<this->rl.size(); i++) {
+    for (uint i=0; i<this->rl.size(); i++) {
       this->rl[i]->update_spring_damper();
-      for (int j=0; j<this->rl[i]->pl.size(); j++) {
+      for (uint j=0; j<this->rl[i]->pl.size(); j++) {
         this->rl[i]->pl[j]->force = this->rl[i]->pl[j]->deform_force;
         if (this->rl[i]->pl[j]->force.norm() > FORCE_THRE)
           this->rl[i]->pl[j]->updateVerlet(dt);
       }
     }
-    for (int i=0; i<this->rl.size(); i++) {
+    for (uint i=0; i<this->rl.size(); i++) {
       this->rl[i]->reinit();
     }
   }

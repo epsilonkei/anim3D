@@ -72,8 +72,8 @@ void initGL() {
 void initSim() {
    // for solids
    double rgl = 0.4;
-   for (int i = 0; i < N_solid; i++) {
-      for (int j = 0; j < N_part_per_solid; j++) {
+   for (uint i = 0; i < N_solid; i++) {
+      for (uint j = 0; j < N_part_per_solid; j++) {
          if (j == 0) {
             poss[i*8+j][0] = 0; poss[i*8+j][1] = 0; poss[i*8+j][2] = solid_height;
          } else if (j == 1) {
@@ -100,7 +100,7 @@ void initSim() {
                           vels[i*8+j], accs[i*8+j]);
       }
    }
-   for (int i = 0; i < FLR.rl[0]->pl.size(); i++) {
+   for (uint i = 0; i < FLR.rl[0]->pl.size(); i++) {
       FLR.rl[0]->pl[i]->init();
       FLR.rl[0]->pl[i]->force = - FLR.rl[0]->pl[i]->mass * grav * e3;
    }
@@ -157,7 +157,7 @@ void display() {
    draw_origin();
    // Draw particle
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
-   for (int i = 0; i < FLR.rl[0]->pl.size(); i++) {
+   for (uint i = 0; i < FLR.rl[0]->pl.size(); i++) {
       glPushMatrix();
       glTranslatef(FLR.rl[0]->pl[i]->pos[0], FLR.rl[0]->pl[i]->pos[1], FLR.rl[0]->pl[i]->pos[2]);
       glutSolidSphere (FLR.rl[0]->pl[i]->radius, 16, 16);

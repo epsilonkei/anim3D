@@ -23,7 +23,7 @@ public:
     this->floors.push_back(boost::shared_ptr<static_floor>(new static_floor(_org, _norm, _elas)));
   }
 
-  void add_particle(double _elas, double _mass, double _radius, double* _prev_pos, double* _pos, double* _vel, double* _acc, int i=0) {
+  void add_particle(double _elas, double _mass, double _radius, double* _prev_pos, double* _pos, double* _vel, double* _acc, uint i=0) {
     while ( this->rl.size() <= i ) this->rl.push_back(boost::shared_ptr<rigid_body>(new rigid_body));
     this->rl[i]->add_particle(_elas, _mass, _radius, _prev_pos, _pos, _vel, _acc);
   }
@@ -31,7 +31,7 @@ public:
   void floor_collision_penalty(boost::shared_ptr<particle>& part, bool apply_grav=true) {
     if (apply_grav) part->force = -part->mass * grav * e3;
     else part->force = Eigen::Vector3d::Zero();
-    for (int k=0; k<this->floors.size(); k++) {
+    for (uint k=0; k<this->floors.size(); k++) {
       double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
         - part->radius;
       if (dist_to_floor < 0) {
@@ -42,8 +42,8 @@ public:
   }
 
   void floor_collision_penalty_all(bool apply_grav=true) {
-    for (int i=0; i<this->rl.size(); i++) {
-      for (int j=0; j<this->rl[i]->pl.size(); j++) {
+    for (uint i=0; i<this->rl.size(); i++) {
+      for (uint j=0; j<this->rl[i]->pl.size(); j++) {
         floor_collision_penalty(this->rl[i]->pl[j] ,apply_grav);
       }
     }
@@ -54,7 +54,7 @@ public:
   }
 
   void update_bounding(boost::shared_ptr<rigid_body>& r) {
-    for (int i=0; i<r->bounding_plane_cent_local.size(); i++) {
+    for (uint i=0; i<r->bounding_plane_cent_local.size(); i++) {
       r->bounding_plane_out_normv[i] = r->rotation * r->bounding_plane_cent_local[i];
       r->bounding_plane_cent[i] = r->bounding_plane_out_normv[i] + r->com;
       r->bounding_plane_out_normv[i].normalize();
@@ -64,10 +64,10 @@ public:
   // TODO: need other method when r1 is completedly inside r2
   void apply_penalty_force(boost::shared_ptr<rigid_body>& r1, boost::shared_ptr<rigid_body>& r2) {
     double dist_to_plane;
-    bool collided; int opp_id;
-    for (int id=0; id<r1->pl.size(); id++) {
+    bool collided; int opp_id = 0;
+    for (uint id=0; id<r1->pl.size(); id++) {
       collided = true;
-      for (int j=0; j<r2->bounding_plane_cent.size(); j++) {
+      for (uint j=0; j<r2->bounding_plane_cent.size(); j++) {
         dist_to_plane = r2->bounding_plane_out_normv[j].dot(r1->pl[id]->pos
                                                             - r2->bounding_plane_cent[j]);
         if (dist_to_plane > 0) {
@@ -84,7 +84,7 @@ public:
         else if (id == 5) opp_id = 3;
         else if (id == 6) opp_id = 0;
         else if (id == 7) opp_id = 1;
-        for (int j=0; j<r2->bounding_plane_cent.size(); j++) {
+        for (uint j=0; j<r2->bounding_plane_cent.size(); j++) {
           dist_to_plane = r2->bounding_plane_out_normv[j].dot(r1->pl[opp_id]->pos
                                                               - r2->bounding_plane_cent[j]);
           if (dist_to_plane > 0) {
@@ -114,12 +114,12 @@ public:
   void update_movement(double dt) {
     // Notes: initial force was apply in floor collision penalty function
     floor_collision_penalty_all(true);
-    for (int i=0; i<this->rl.size(); i++ ) {
-      for (int j=i+1; j<this->rl.size(); j++ ) {
+    for (uint i=0; i<this->rl.size(); i++ ) {
+      for (uint j=i+1; j<this->rl.size(); j++ ) {
         collide_penalty(this->rl[i], this->rl[j]);
       }
     }
-    for (int i=0; i<this->rl.size(); i++) {
+    for (uint i=0; i<this->rl.size(); i++) {
       rl[i]->update_rigid_movement(dt);
       rl[i]->update_particles_movement(dt);
     }

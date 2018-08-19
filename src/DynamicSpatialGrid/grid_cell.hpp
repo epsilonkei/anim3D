@@ -37,7 +37,7 @@ public:
   }
 
   void removeGridPoint(grid_point *gp) {
-    for (int i=0; i<(int)points.size(); i++) {
+    for (uint i=0; i<points.size(); i++) {
       if (points[i]->id == gp->id) {
         gp->isInGridCell = false;
         points.erase(points.begin() + i);

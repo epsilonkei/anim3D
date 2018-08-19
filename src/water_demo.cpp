@@ -4,21 +4,22 @@
 #include <iostream>
 #include <sys/stat.h>
 #include "floors_fluid.hpp"
-#include "utils/save_image.hpp"
 
+#if ENABLE_SCREEN_SHOT
+#include "utils/save_image.hpp"
 #define GL_GLEXT_PROTOTYPES 1
+static GLubyte *pixels = NULL;
+static const GLenum FORMAT = GL_RGBA;
+static const GLuint FORMAT_NBYTES = 4;
+static unsigned int nscreenshots = 0;
+#endif // ENABLE_SCREEN_SHOT
 
 extern double grav;
 extern Eigen::Vector3d e1, e2, e3;
 extern double PI;
 
-static GLubyte *pixels = NULL;
-static const GLenum FORMAT = GL_RGBA;
-static const GLuint FORMAT_NBYTES = 4;
-static unsigned int nscreenshots = 0;
-static double timeInSim = 0.0;
-
 static int count = 0;
+static double timeInSim = 0.0;
 
 // Global variables
 char img_folder[] = "/tmp/water/";
@@ -34,7 +35,7 @@ double dt = refreshMillis * 1e-3;
 int frameRate = 1000 / refreshMillis;
 #define MAX_TIME 30
 
-#define N_part_per_fluid 500
+#define N_part_per_fluid 1000
 #define N_fluid 1
 double part_mass = 1e-3, part_radius = 0.05;
 double prev_poss[N_part_per_fluid * N_fluid][3], poss[N_part_per_fluid * N_fluid][3],
@@ -110,9 +111,11 @@ void initGL() {
    glEnable(GL_LIGHT0);
 }
 
+#if ENABLE_SCREEN_SHOT
 void deinit()  {
     free(pixels);
 }
+#endif // ENABLE_SCREEN_SHOT
 
 void initFloor() {
    floor_elass[0] = 0.8;
@@ -444,7 +447,9 @@ int main(int argc, char** argv) {
    }
    initSim();
    initGL();
+#if ENABLE_SCREEN_SHOT
    atexit(deinit);
+#endif // ENABLE_SCREEN_SHOT
    glutMainLoop();               // Enter event-processing loop
    return 0;
 }

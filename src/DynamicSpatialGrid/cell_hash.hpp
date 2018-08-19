@@ -23,7 +23,7 @@ public:
     }
     grid_cell *c;
     std::vector<grid_cell*> chain = cellMap[h];
-    for (int idx=0; idx<(int)chain.size(); idx++) {
+    for (uint idx=0; idx<chain.size(); idx++) {
         c = chain[idx];
         if (c->i == i && c->j == j and c->k == k) {
             return true;
@@ -54,7 +54,7 @@ public:
     // remove from hash chain
     bool isRemoved = false;
     std::vector<grid_cell*> chain = cellMap[h];
-    for (int idx=0; idx<(int)chain.size(); idx++) {
+    for (uint idx=0; idx<chain.size(); idx++) {
         grid_cell *c = (cellMap[h])[idx];
         if (c->i == i && c->j == j && c->k == k) {
             cellMap[h].erase(cellMap[h].begin() + idx);
@@ -75,7 +75,7 @@ public:
     long h = computeHash(i, j, k);
     grid_cell *c;
     std::vector<grid_cell*> chain = cellMap[h];
-    for (int idx=0; idx<(int)chain.size(); idx++) {
+    for (uint idx=0; idx<chain.size(); idx++) {
         c = chain[idx];
         if (c->i == i && c->j == j and c->k == k) {
             return c;
@@ -88,7 +88,7 @@ public:
     long h = computeHash(i, j, k);
     grid_cell *c;
     std::vector<grid_cell*> chain = cellMap[h];
-    for (int idx=0; idx<(int)chain.size(); idx++) {
+    for (uint idx=0; idx<chain.size(); idx++) {
         c = chain[idx];
         if (c->i == i && c->j == j and c->k == k) {
             *isGridCellFound = true;
@@ -101,7 +101,7 @@ public:
 
   void getGridCells(std::vector<grid_cell*> *cells) {
     for (std::pair<int, std::vector<grid_cell*>> pair: cellMap) {
-        for (int i=0; i < (int)pair.second.size(); i++) {
+        for (uint i=0; i < pair.second.size(); i++) {
             cells->push_back(pair.second[i]);
         }
     }

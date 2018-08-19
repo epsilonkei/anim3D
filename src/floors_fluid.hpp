@@ -21,7 +21,7 @@ public:
     this->floors.push_back(boost::shared_ptr<static_floor>(new static_floor(_org, _norm, _elas)));
   }
 
-  void add_particle(double _elas, double _mass, double _radius, double* _prev_pos, double* _pos, double* _vel, double* _acc, int i=0, double _kern_size=20.0, double _init_dens=20.0) {
+  void add_particle(double _elas, double _mass, double _radius, double* _prev_pos, double* _pos, double* _vel, double* _acc, uint i=0, double _kern_size=20.0, double _init_dens=20.0) {
     while ( this->fluids.size() <= i )
       this->fluids.push_back(boost::shared_ptr<fluid>(new fluid(_kern_size, _init_dens)));
     this->fluids[i]->add_particle(_elas, _mass, _radius, _prev_pos, _pos, _vel, _acc);
@@ -30,7 +30,7 @@ public:
   void floor_collision_penalty(boost::shared_ptr<particle>& part, bool apply_grav=true) {
     if (apply_grav) part->force = -part->mass * grav * e3;
     else part->force = Eigen::Vector3d::Zero();
-    for (int k=0; k<this->floors.size(); k++) {
+    for (uint k=0; k<this->floors.size(); k++) {
       double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
         - part->radius;
       Eigen::Vector3d proj_point = part->pos - (dist_to_floor + part->radius)
@@ -49,7 +49,7 @@ public:
     Eigen::Vector3d vel_on_norm, vel_other;
     if (apply_grav) part->force = -part->mass * grav * e3;
     else part->force = Eigen::Vector3d::Zero();
-    for (int k=0; k<this->floors.size(); k++) {
+    for (uint k=0; k<this->floors.size(); k++) {
       double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
         - part->radius;
       Eigen::Vector3d proj_point = part->pos - (dist_to_floor + part->radius)
@@ -68,8 +68,8 @@ public:
   }
 
   void floor_collision_penalty_all(bool apply_grav=true) {
-    for (int i=0; i<this->fluids.size(); i++) {
-      for (int j=0; j<this->fluids[i]->pl.size(); j++) {
+    for (uint i=0; i<this->fluids.size(); i++) {
+      for (uint j=0; j<this->fluids[i]->pl.size(); j++) {
         // floor_collision_penalty(this->fluids[i]->pl[j] ,apply_grav);
         floor_collision_pos_response(this->fluids[i]->pl[j] ,apply_grav);
       }

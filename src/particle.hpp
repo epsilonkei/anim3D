@@ -13,12 +13,13 @@ public:
   particle(double _mass, double _radius, double _last_dt, double* _prev_pos, double* _pos, double* _vel, double* _acc)
     : prev_pos(Eigen::Map<Eigen::Vector3d>(_prev_pos,3)),
       pos(Eigen::Map<Eigen::Vector3d>(_pos,3)),
+      pos_to_cent(Eigen::Vector3d::Zero()),
       vel(Eigen::Map<Eigen::Vector3d>(_vel,3)),
       acc(Eigen::Map<Eigen::Vector3d>(_acc,3)),
-      pos_to_cent(Eigen::Vector3d::Zero()),
-      mass(_mass), radius(_radius), last_dt(_last_dt), time(0), dens(0), pres(0),
+      mass(_mass), radius(_radius), dens(0), pres(0),
       force(Eigen::Vector3d::Zero()),
-      deform_force(Eigen::Vector3d::Zero())
+      deform_force(Eigen::Vector3d::Zero()),
+      last_dt(_last_dt), time(0)
   {}
   ~ particle() {
     // std::cout << "destroy particle" << std::endl;

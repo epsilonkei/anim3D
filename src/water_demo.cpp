@@ -181,7 +181,7 @@ void initFluid() {
          vels[i*8+j][0] = 0; vels[i*8+j][1] = 0; vels[i*8+j][2] = 0;
          accs[i*8+j][0] = 0; accs[i*8+j][1] = 0; accs[i*8+j][2] = 0;
          FF.add_particle(part_mass, part_radius, dt, prev_poss[i*8+j], poss[i*8+j],
-                         vels[i*8+j], accs[i*8+j], i, 0.3, 20.0);
+                         vels[i*8+j], accs[i*8+j], i, 0.2, 20.0);
       }
    }
    for (uint i = 0; i < FF.fluids.size(); i++) {

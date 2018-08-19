@@ -75,13 +75,14 @@ public:
   }
 
   void update_density_and_pressure() {
+    double dist_sq, diff;
     for (uint i = 0; i < this->pl.size(); i++) {
-      double dist_sq, diff, _dens = 0.0;
       // Use neighboring particles
+      this->pl[i]->dens = 0.0;
       for (uint j=0; j < nb[i].size(); j++) {
         dist_sq = (pl[i]->pos - nb[i][j]->pos).squaredNorm();
         diff = this->kern_size * this->kern_size - dist_sq;
-        pl[i]->dens += nb[i][j]->mass * this->poly6_coeff * diff * diff * diff;
+        this->pl[i]->dens += nb[i][j]->mass * this->poly6_coeff * diff * diff * diff;
       }
       // // Use all particles
       // for (uint j=0; j < this->pl.size(); j++) {
@@ -89,9 +90,9 @@ public:
       //   dist_sq = (this->pl[i]->pos - this->pl[j]->pos).squaredNorm();
       //   diff = this->kern_size * this->kern_size - dist_sq;
       //   if (diff > 0)
-      //     _dens += this->pl[j]->mass * this->poly6_coeff * diff * diff * diff;
+      //     this->pl[i]->dens += this->pl[j]->mass * this->poly6_coeff * diff * diff * diff;
       // }
-      this->pl[i]->dens = std::max(_dens, this->init_dens);
+      this->pl[i]->dens = std::max(this->pl[i]->dens, this->init_dens);
       this->pl[i]->pres = K_PRESS*(this->pl[i]->dens - this->init_dens);
     }
   }

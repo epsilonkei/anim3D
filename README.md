@@ -12,7 +12,7 @@ sudo apt-get install libboost-all-dev #Boost
 ```
 # Compile
 mkdir build_assign3
-cp CMakeLists.txt.assign3 CMakeLists.txt
+ln -s CMakeLists.txt.assign3 CMakeLists.txt
 cd build_assign3
 cmake ..
 make

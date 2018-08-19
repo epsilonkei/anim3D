@@ -93,7 +93,10 @@ public:
     //     collide_penalty(this->rl[i], this->rl[j]);
     //   }
     // }
-    for (int i=0; i<this->fluids.size(); i++ ) {
+// #if ENABLE_OPENMP
+// #pragma omp parallel for
+// #endif // ENABLE_OPENMP
+    for (uint i=0; i<this->fluids.size(); i++ ) {
       this->fluids[i]->update(dt);
     }
   }

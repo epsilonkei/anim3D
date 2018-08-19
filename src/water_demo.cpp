@@ -85,7 +85,6 @@ void initGL() {
    glLoadIdentity();
    glMatrixMode(GL_MODELVIEW);
    pixels = (GLubyte*)malloc(FORMAT_NBYTES * windowWidth * windowHeight);
-#endif //ENABLE_SCREEN_SHOT
 
    struct stat sb;
    if (!stat(img_folder, &sb) == 0 || !S_ISDIR(sb.st_mode)) {
@@ -95,6 +94,7 @@ void initGL() {
          exit(1);
       }
    }
+#endif //ENABLE_SCREEN_SHOT
 
    // Depth Test
    glEnable( GL_DEPTH_TEST );
@@ -279,9 +279,12 @@ void draw_slide() {
 }
 
 void draw_fluid() {
-   for (int i = 0; i<FF.fluids.size(); i++) {
+// #if ENABLE_OPENMP
+// #pragma omp parallel for
+// #endif // ENABLE_OPENMP
+   for (uint i = 0; i<FF.fluids.size(); i++) {
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[(i + 2) % (sizeof(color)/sizeof(*color))]);
-      for (int j = 0; j < FF.fluids[i]->pl.size(); j++) {
+      for (uint j = 0; j < FF.fluids[i]->pl.size(); j++) {
          glPushMatrix();
          glTranslatef(FF.fluids[i]->pl[j]->pos[0], FF.fluids[i]->pl[j]->pos[1],
                       FF.fluids[i]->pl[j]->pos[2]);

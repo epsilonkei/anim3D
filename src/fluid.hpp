@@ -58,6 +58,9 @@ public:
   }
 
   void update_grid() {
+// #if ENABLE_OPENMP
+// #pragma omp parallel for
+// #endif // ENABLE_OPENMP
     for (uint i=0; i<pl.size(); i++) {
       grid.movePoint(part_grid_id[i], pl[i]->pos);
     }
@@ -65,9 +68,16 @@ public:
   }
 
   void find_neighbor() {
+    std::vector<int> refs;
+#if ENABLE_OPENMP
+#pragma omp parallel for private(refs)
+#endif // ENABLE_OPENMP
     for (uint i=0; i<nb.size(); i++) {
       nb[i].clear();
-      std::vector<int> refs = grid.getIDsInRadiusOfPoint(part_grid_id[i], kern_size);
+      refs = grid.getIDsInRadiusOfPoint(part_grid_id[i], kern_size);
+      // #if ENABLE_OPENMP
+      // #pragma omp parallel for
+      // #endif // ENABLE_OPENMP
       for (uint j=0; j<refs.size(); j++) {
         nb[i].push_back(particlesByGridID[refs[j]]);
       }
@@ -76,6 +86,9 @@ public:
 
   void update_density_and_pressure() {
     double dist_sq, diff;
+// #if ENABLE_OPENMP
+// #pragma omp parallel for private(dist_sq, diff)
+// #endif // ENABLE_OPENMP
     for (uint i = 0; i < this->pl.size(); i++) {
       // Use neighboring particles
       this->pl[i]->dens = 0.0;
@@ -100,6 +113,9 @@ public:
   void update_fluid_acc() {
     double dist, diff, spikey, massRatio, pterm, lap, mag;
     Eigen::Vector3d r, acc, vdiff, damp;
+// #if ENABLE_OPENMP
+// #pragma omp parallel for private(dist, diff, spikey, massRatio, pterm, lap, mag, r, acc, vdiff, damp)
+// #endif // ENABLE_OPENMP
     for (uint i=0; i<this->pl.size(); i++) {
       acc = Eigen::Vector3d::Zero();
       // Use neighboring particles
@@ -230,6 +246,9 @@ public:
       particles_timer.start();
 #endif // ENABLE_TIMER
       // Move particles
+// #if ENABLE_OPENMP
+// #pragma omp parallel for
+// #endif // ENABLE_OPENMP
       for(uint i=0; i<pl.size(); i++) {
         pl[i]->updateVerlet(time_step);
       }

@@ -20,7 +20,7 @@ int windowHeight = 480;     // Windowed mode's height
 int windowPosX   = 50;      // Windowed mode's top-left corner x
 int windowPosY   = 50;      // Windowed mode's top-left corner y
 
-int refreshMillis = 30;      // Refresh period in milliseconds
+uint refreshMillis = 30;      // Refresh period in milliseconds
 // double dt = refreshMillis * 1e-3;
 double dt = 1e-3;
 
@@ -66,7 +66,7 @@ void initGL() {
 void initSim() {
    double ball_radiuss = 0.2, ball_masss = 1, wl = 1, height = 2;
    // double init_angle = -30;
-   for (int i = 0; i < N_ball; i++) {
+   for (uint i = 0; i < N_ball; i++) {
       norm_vec[i][0] = 0; norm_vec[i][1] = 1; norm_vec[i][2] = 0;
       // prev_poss[i][0] = (height - wl) * sin(init_angle);
       // prev_poss[i][1] = 0; prev_poss[i][2] = (height - wl) * cos(init_angle);
@@ -89,7 +89,7 @@ void initSim() {
       // accs[i] = {0,0,0}; only works with C++0x and above
       PL.add_pendulum(wl, fpoint[i], norm_vec[i], ball_masss, ball_radiuss, dt, prev_poss[i], poss[i], vels[i], accs[i]);
    }
-   for (int i = 0; i < PL.pl.size(); i++) {
+   for (uint i = 0; i < PL.pl.size(); i++) {
       PL.pl[i]->pt.init();
       PL.pl[i]->pt.force = - PL.pl[i]->pt.mass * grav * e3;
    }
@@ -98,11 +98,11 @@ void initSim() {
 
 void physics_calculate(){
    // Animation Control - compute the location for the next Refresh
-   for (int i = 0; i < refreshMillis; i++) {
+   for (uint i = 0; i < refreshMillis; i++) {
       PL.update(dt);
    }
    energy = 0;
-   for (int i = 0; i < PL.pl.size(); i++) {
+   for (uint i = 0; i < PL.pl.size(); i++) {
       energy += PL.pl[i]->pt.mass * (PL.pl[i]->pt.vel.squaredNorm() + grav * PL.pl[i]->pt.pos[2]);
    }
    // result_file << PL.pl[0]->pt.time << " " << energy << "\n";
@@ -121,14 +121,14 @@ void draw_pendulums(pendulums _PL){
    // Draw wire
    glDisable(GL_LIGHTING); glBegin(GL_LINES);
    glColor3f(0.1, 0.9, 0.9);
-   for (int i = 0; i < _PL.pl.size(); i++) {
+   for (uint i = 0; i < _PL.pl.size(); i++) {
       glVertex3f(_PL.pl[i]->fixed_point[0], _PL.pl[i]->fixed_point[1], _PL.pl[i]->fixed_point[2]);
       glVertex3f(_PL.pl[i]->pt.pos[0], _PL.pl[i]->pt.pos[1], _PL.pl[i]->pt.pos[2]);
    }
    glEnd(); glEnable(GL_LIGHTING);
    // Draw ball
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
-   for (int i = 0; i < _PL.pl.size(); i++) {
+   for (uint i = 0; i < _PL.pl.size(); i++) {
       glPushMatrix();
       glTranslatef(_PL.pl[i]->pt.pos[0], _PL.pl[i]->pt.pos[1], _PL.pl[i]->pt.pos[2]);
       glutSolidSphere (_PL.pl[i]->pt.radius, 16, 16);

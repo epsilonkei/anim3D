@@ -73,7 +73,7 @@ void initSim() {
    double ball_radiuss = 0.2, ball_masss = 1;
    double tbl = BT.table_length;
    srand(0);
-   for (int i = 0; i < N_ball; i++) {
+   for (uint i = 0; i < N_ball; i++) {
       poss[i][0] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
       poss[i][1] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
       poss[i][2] = ball_radiuss;
@@ -85,7 +85,7 @@ void initSim() {
       // accs[i] = {0,0,0}; only works with C++0x and above
       BT.add_particle(ball_masss, ball_radiuss, dt, prev_poss[i], poss[i], vels[i], accs[i]);
    }
-   for (int i = 0; i < BT.pl.size(); i++) {
+   for (uint i = 0; i < BT.pl.size(); i++) {
       BT.pl[i]->init();
    }
 }
@@ -128,7 +128,7 @@ void draw_particles(particles _BT){
    //
    glEnd(); glEnable(GL_LIGHTING);
    // Draw ball
-   for (int i = 0; i < _BT.pl.size(); i++) {
+   for (uint i = 0; i < _BT.pl.size(); i++) {
       glPushMatrix();
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color[i % (sizeof(color)/sizeof(*color))]);
       // glTranslatef(_BT.pl[i].pos[0], _BT.pl[i].pos[1], _BT.pl[i].pos[2]);

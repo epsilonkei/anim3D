@@ -104,13 +104,13 @@ public:
   }
 
   void updateVerletAll(double dt) {
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       this->pl[i]->updateVerlet(dt);
     }
   }
 
   void updateEulerAll(double dt) {
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       this->pl[i]->updateEuler(dt);
     }
   }
@@ -136,17 +136,17 @@ public:
   }
 
   void checkBounceCollideAll() {
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       checkBounceCollide(this->pl[i]);
     }
   }
 
   void setGravitationalForceAll() {
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       // Reset all force/acc to zero
       this->pl[i]->force = Eigen::Vector3d::Zero();
       // this->pl[i]->acc = Eigen::Vector3d::Zero();
-      for ( int j=0; j<this->pl.size(); j++ ) {
+      for ( uint j=0; j<this->pl.size(); j++ ) {
         if ( i == j ) continue;
         Eigen::Vector3d dist_vec = (this->pl[j]->pos - this->pl[i]->pos);
         double dist = std::max(dist_vec.norm(), EPSILON); // Deal with too small distance problem
@@ -169,7 +169,7 @@ public:
           / (dist * dist * dist) * dist_vec;
         // this->pl[pid]->acc += G_CONST * _node->mass / (dist * dist * dist) * dist_vec;
       } else {
-        for (int i=0; i < _node->childs.size(); i++) {
+        for (uint i=0; i < _node->childs.size(); i++) {
           calcForceFromNode(pid, _node->childs[i]);
         }
       }
@@ -186,11 +186,11 @@ public:
     // Create quadtree
     boost::shared_ptr<node> root(new node(2 * this->table_length,
                                           -this->table_length, -this->table_length));
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       root->add_particle(i, pl);
     }
     // Calculate gravitational force
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       // Reset all force/acc to zero
       // this->pl[i]->acc = Eigen::Vector3d::Zero();
       this->pl[i]->force = Eigen::Vector3d::Zero();
@@ -201,8 +201,8 @@ public:
   void update(double dt) {
     updateVerletAll(dt);
     // updateEulerAll(dt);
-    for ( int i=0; i<this->pl.size(); i++ ) {
-      for ( int j=i+1; j<this->pl.size(); j++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
+      for ( uint j=i+1; j<this->pl.size(); j++ ) {
         if (is_collided(this->pl[i], this->pl[j])) {
           posBasedResponse(this->pl[i], this->pl[j]);
         }

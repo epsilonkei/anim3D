@@ -11,9 +11,9 @@ public:
   double wire_length;
 
   pendulum(double _wl, double* _fp, double* _nv)
-    : wire_length(_wl),
-      fixed_point(Eigen::Map<Eigen::Vector3d>(_fp,3)),
-      norm_vec(Eigen::Map<Eigen::Vector3d>(_nv,3))
+    : fixed_point(Eigen::Map<Eigen::Vector3d>(_fp,3)),
+      norm_vec(Eigen::Map<Eigen::Vector3d>(_nv,3)),
+      wire_length(_wl)
   {}
   ~ pendulum() {
   }

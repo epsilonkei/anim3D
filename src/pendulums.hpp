@@ -60,14 +60,14 @@ public:
   }
 
   void updateVerletAll(double dt) {
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       // this->pl[i]->updateVerlet(dt);
       this->pl[i]->updateVerletForceBased(dt);
     }
   }
 
   void updateEulerAll(double dt) {
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       // this->pl[i]->updateEuler(dt);
       this->pl[i]->updateEulerForceBased(dt);
     }
@@ -78,15 +78,15 @@ public:
   void update(double dt) {
     updateVerletAll(dt);
     // updateEulerAll(dt);
-    for ( int i=0; i<this->pl.size(); i++ ) {
-      for ( int j=i+1; j<this->pl.size(); j++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
+      for ( uint j=i+1; j<this->pl.size(); j++ ) {
         if (is_collided( &(this->pl[i]->pt), &(this->pl[j]->pt) )) {
           posBasedResponse( &(this->pl[i]->pt), &(this->pl[j]->pt) );
         }
       }
     }
     // Update Contraint
-    for ( int i=0; i<this->pl.size(); i++ ) {
+    for ( uint i=0; i<this->pl.size(); i++ ) {
       this->pl[i]->updateConstraint();
     }
   }

@@ -71,7 +71,7 @@ void initSim() {
    // double ball_radiuss = 0.1, ball_masss = 1;
    double ball_radiuss = std::min(0.2, tbl * 10/N_ball), ball_masss = 1;
    srand(0);
-   for (int i = 0; i < N_ball; i++) {
+   for (uint i = 0; i < N_ball; i++) {
       // prev_poss[i][0] = i * 0.5 - 3; prev_poss[i][1] = 0; prev_poss[i][2] = ball_radiuss;
       poss[i][0] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
       poss[i][1] = double(rand()) / RAND_MAX * 2 * tbl - tbl;
@@ -82,7 +82,7 @@ void initSim() {
       // accs[i] = {0,0,0}; only works with C++0x and above
       PL.add_particle(ball_masss, ball_radiuss, dt, prev_poss[i], poss[i], vels[i], accs[i]);
    }
-   for (int i = 0; i < PL.pl.size(); i++) {
+   for (uint i = 0; i < PL.pl.size(); i++) {
       PL.pl[i]->init();
    }
 }
@@ -142,7 +142,7 @@ void draw_particles(particles _PL){
    glEnd(); glEnable(GL_LIGHTING);
    // Draw ball
    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, red);
-   for (int i = 0; i < _PL.pl.size(); i++) {
+   for (uint i = 0; i < _PL.pl.size(); i++) {
       glPushMatrix();
       // glTranslatef(_PL.pl[i].pos[0], _PL.pl[i].pos[1], _PL.pl[i].pos[2]);
       glTranslatef(_PL.pl[i]->pos[0], _PL.pl[i]->pos[1], _PL.pl[i]->pos[2]);
@@ -206,17 +206,17 @@ void reshape(GLsizei width, GLsizei height) {
    gluPerspective(60.0, aspect, 1.0, 60.0);
 }
 
-// /* Called back when the timer expired */
-// void Timer(int value) {
-//    glutPostRedisplay();    // Post a paint request to activate display()
-//    glutTimerFunc(refreshMillis, Timer, 0); // subsequent timer call at milliseconds
-// }
+/* Called back when the timer expired */
+void Timer(int value) {
+   glutPostRedisplay();    // Post a paint request to activate display()
+   glutTimerFunc(refreshMillis, Timer, 0); // subsequent timer call at milliseconds
+}
 
 /* Callback handler for normal-key event */
 void keyboard(unsigned char key, int x, int y) {
    switch (key) {
    case 27:     // ESC key
-      std::cout << "Average time: " << (sum_time / N_iterate) << " [sec]" << std::endl;
+      // std::cout << "Average time: " << (sum_time / N_iterate) << " [sec]" << std::endl;
       exit(0);
       break;
    case 'r':    // r: Reset default camera
@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
    glutCreateWindow(title);      // Create window with given title
    glutDisplayFunc(display);     // Register callback handler for window re-paint
    glutReshapeFunc(reshape);     // Register callback handler for window re-shape
-   // glutTimerFunc(0, Timer, 0);   // First timer call immediately
+   glutTimerFunc(0, Timer, 0);   // First timer call immediately
    glutSpecialFunc(specialKeys); // Register callback handler for special-key event
    glutKeyboardFunc(keyboard);   // Register callback handler for special-key event
    glutIdleFunc(idle);

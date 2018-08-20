@@ -7,7 +7,7 @@ static void create_ppm(char *prefix, int frame_id, unsigned int width, unsigned 
     size_t i, j, k, cur;
     enum Constants { max_filename = 256 };
     char filename[max_filename];
-    snprintf(filename, max_filename, "%s%d.ppm", prefix, frame_id);
+    snprintf(filename, max_filename, "%s%03d.ppm", prefix, frame_id+1);
     FILE *f = fopen(filename, "w");
     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
     for (i = 0; i < height; i++) {

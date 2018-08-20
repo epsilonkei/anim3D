@@ -37,7 +37,7 @@ int frameRate = 1000 / refreshMillis;
 
 #define N_part_per_fluid 1000
 #define N_fluid 1
-double part_mass = 1e-3, part_radius = 0.05;
+double part_mass = 1e-1, part_radius = 0.05;
 double prev_poss[N_part_per_fluid * N_fluid][3], poss[N_part_per_fluid * N_fluid][3],
    vels[N_part_per_fluid * N_fluid][3], accs[N_part_per_fluid * N_fluid][3];
 
@@ -328,7 +328,7 @@ void display() {
    create_ppm(img_folder, nscreenshots, windowWidth, windowHeight, 255, FORMAT_NBYTES, pixels);
    nscreenshots++;
 #endif //ENABLE_SCREEN_SHOT
-   if (timeInSim > MAX_TIME) exit(0);
+   // if (timeInSim > MAX_TIME) exit(0);
    // if (count >= 5) exit(0);
 }
 

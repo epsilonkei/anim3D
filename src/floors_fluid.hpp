@@ -33,6 +33,36 @@ public:
     for (uint k=0; k<this->floors.size(); k++) {
       double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
         - part->radius;
+      if (dist_to_floor < 0) {
+        part->force += part->mass * (- WALL_DGAIN*dist_to_floor - WALL_VGAIN*
+                        part->vel.dot(this->floors[k]->norm_vec)) * this->floors[k]->norm_vec;
+      }
+    }
+  }
+
+  void floor_collision_pos_response(boost::shared_ptr<particle>& part, bool apply_grav=true) {
+    Eigen::Vector3d vel_on_norm, vel_other;
+    if (apply_grav) part->force = -part->mass * grav * e3;
+    else part->force = Eigen::Vector3d::Zero();
+    for (uint k=0; k<this->floors.size(); k++) {
+      double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
+        - part->radius;
+      if (dist_to_floor < 0) {
+        part->pos -= this->floors[k]->norm_vec * dist_to_floor;
+        vel_on_norm = part->vel.dot(this->floors[k]->norm_vec) * this->floors[k]->norm_vec;
+        vel_other = part->vel - vel_on_norm;
+        part->vel = vel_other - vel_on_norm * this->floors[k]->elasticity;
+        part->prev_pos = part->pos - part->vel * part->last_dt;
+      }
+    }
+  }
+
+  void floor_collision_penalty_with_limit(boost::shared_ptr<particle>& part, bool apply_grav=true) {
+    if (apply_grav) part->force = -part->mass * grav * e3;
+    else part->force = Eigen::Vector3d::Zero();
+    for (uint k=0; k<this->floors.size(); k++) {
+      double dist_to_floor = this->floors[k]->norm_vec.dot(part->pos - this->floors[k]->origin)
+        - part->radius;
       Eigen::Vector3d proj_point = part->pos - (dist_to_floor + part->radius)
         * this->floors[k]->norm_vec;
       if (dist_to_floor < 0
@@ -45,7 +75,7 @@ public:
     }
   }
 
-  void floor_collision_pos_response(boost::shared_ptr<particle>& part, bool apply_grav=true) {
+  void floor_collision_pos_response_with_limit(boost::shared_ptr<particle>& part, bool apply_grav=true) {
     Eigen::Vector3d vel_on_norm, vel_other;
     if (apply_grav) part->force = -part->mass * grav * e3;
     else part->force = Eigen::Vector3d::Zero();
@@ -71,7 +101,9 @@ public:
     for (uint i=0; i<this->fluids.size(); i++) {
       for (uint j=0; j<this->fluids[i]->pl.size(); j++) {
         // floor_collision_penalty(this->fluids[i]->pl[j] ,apply_grav);
-        floor_collision_pos_response(this->fluids[i]->pl[j] ,apply_grav);
+        // floor_collision_penalty_with_limit(this->fluids[i]->pl[j] ,apply_grav);
+        // floor_collision_pos_response(this->fluids[i]->pl[j] ,apply_grav);
+        floor_collision_pos_response_with_limit(this->fluids[i]->pl[j] ,apply_grav);
       }
     }
   }

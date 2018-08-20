@@ -40,5 +40,5 @@ The same method can be used to compile and execute for assignment 1 and assignme
 * [Video](https://www.youtube.com/watch?v=A6J8pfpZx8I)
 ### Fluids Simulation Using SPH(Smoothed Particle Hydrodynamics) and Dynamic Spatial Grid
 * References: [Sph survival kit](https://www8.cs.umu.se/kurser/TDBD24/VT06/lectures/sphsurvivalkit.pdf), [Smoothed particle hydrodynamics fluid simulation](http://rlguy.com/sphfluidsim/)
-* Demo with N = 1000 particles: [Video](https://www.youtube.com/watch?v=aHoQozNnp8M)
-* Demo with N = 5000 particles: [Video](https://www.youtube.com/watch?v=sdG1NiOtwJY)
+* Demo with N = 1000 particles: [Video](https://www.youtube.com/watch?v=1hRqESTSFVw)
+* Demo with N = 10000 particles: [Video](https://www.youtube.com/watch?v=B1MbujBzmo8)
